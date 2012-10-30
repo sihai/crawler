@@ -3,6 +3,7 @@
  */
 package com.ihome.matrix;
 
+import com.ihome.matrix.parser.html.HtmlParserHelper;
 import com.ihome.matrix.parser.url.URLParserHelper;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
@@ -45,6 +46,7 @@ public class MatrixContrller {
 		    
 		    // init 
 		    URLParserHelper.init();
+		    HtmlParserHelper.init();
 		    
 		    /*
 		     * Start the crawl. This is a blocking operation, meaning that your code
@@ -57,6 +59,7 @@ public class MatrixContrller {
 			e.printStackTrace();
 		} finally {
 			URLParserHelper.stop();
+			HtmlParserHelper.stop();
 		}
 	}
 }

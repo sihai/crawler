@@ -11,7 +11,7 @@ package com.ihome.matrix.parser.html;
 public interface HtmlParser {
 	
 	/**
-	 * ½âÎöitemĞÅÏ¢
+	 * 
 	 * @param url
 	 * @param html
 	 */

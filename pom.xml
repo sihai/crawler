@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>edu.uci.ics</groupId>
-	<artifactId>crawler4j</artifactId>
+	<groupId>com.ihome</groupId>
+	<artifactId>crawler</artifactId>
 	<packaging>jar</packaging>
-	<name>crawler4j</name>
-	<version>3.4.1-SNAPSHOT</version>
+	<name>crawler</name>
+	<version>0.0.1-SNAPSHOT</version>
 	<description>Open Source Web Crawler for Java</description>
-	<url>http://code.google.com/p/crawler4j/</url>
+	<url>http://github.com/sihia/crawler</url>
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -14,23 +14,6 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-	<scm>
-		<connection>scm:git:https://crawler4j.googlecode.com/git/</connection>
-		<developerConnection>scm:git:https://crawler4j.googlecode.com/git/</developerConnection>
-		<url>https://crawler4j.googlecode.com/git/</url>
-	</scm>
-	<developers>
-		<developer>
-			<name>Yasser Ganjisaffar</name>
-			<email>{lastname}@gmail.com</email>
-		</developer>
-	</developers>
-	
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
 	
 	<build>
 		<plugins>
