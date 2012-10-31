@@ -143,6 +143,7 @@ public class PageFetcher extends Configurable {
 		String toFetchURL = webUrl.getURL();
 		HttpGet get = null;
 		try {
+			fetchResult.setFetchedUrl(toFetchURL);
 			get = new HttpGet(toFetchURL);
 			synchronized (mutex) {
 				long now = (new Date()).getTime();
@@ -176,7 +177,6 @@ public class PageFetcher extends Configurable {
 				return fetchResult;
 			}
 
-			fetchResult.setFetchedUrl(toFetchURL);
 			String uri = get.getURI().toString();
 			if (!uri.equals(toFetchURL)) {
 				if (!URLCanonicalizer.getCanonicalURL(uri).equals(toFetchURL)) {

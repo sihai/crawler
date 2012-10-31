@@ -3,6 +3,8 @@
  */
 package com.ihome.matrix.parser.url;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -12,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.ihome.matrix.enums.PlatformEnum;
 
 import edu.uci.ics.crawler4j.util.CrawlerThreadFactory;
 
@@ -46,6 +50,16 @@ public class URLParserHelper {
 		
 		// parser map
 		urlParserMap = new HashMap<String, URLParser>();
+		TaobaoURLParser parser = new TaobaoURLParser();
+		parser.setPlatform(PlatformEnum.PLATFORM_TAOBAO);
+		urlParserMap.put("www.taobao.com", parser);
+		urlParserMap.put("item.taobao.com", urlParserMap.get("www.taobao.com"));
+		
+		TaobaoURLParser tmallParser = new TaobaoURLParser();
+		tmallParser.setPlatform(PlatformEnum.PLATFORM_TMALL);
+		urlParserMap.put("www.tmall.com", tmallParser);
+		urlParserMap.put("detail.tmall.com", urlParserMap.get("www.tmall.com"));		
+
 		// thread pool
 		workQueue = new LinkedBlockingQueue<Runnable>(workQueueSize);
 		threadPool = new ThreadPoolExecutor(minThread, maxThread,
@@ -69,22 +83,31 @@ public class URLParserHelper {
 	 * 
 	 * @param url
 	 */
-	public static void parse(String url) {
+	public static void parse(String strURL) {
 		
-		threadPool.execute(new ParseURLTask(null, url));
-		logger.warn("URLParser.threadPool:");
-		logger.warn(String.format("corePoolSize:%d\n" +
-		    "maximumPoolSize:%d\n" +
-		    "activeCount:%d\n" +
-		    "poolSize:%d\n" +
-		    "workQueueSize:%d\n" +
-		    "workQueueRemainingCapacity:%d", 
-		    threadPool.getCorePoolSize(), 
-		    threadPool.getMaximumPoolSize(), 
-		    threadPool.getActiveCount(), 
-		    threadPool.getPoolSize(),
-		    threadPool.getQueue().size(),
-		    threadPool.getQueue().remainingCapacity()));
+		try {
+			URLParser parser = urlParserMap.get(new URL(strURL).getHost());
+			if(null == parser) {
+				logger.info(String.format("No parser for url:%s", strURL));
+				return;
+			}
+			threadPool.execute(new ParseURLTask(parser, strURL));
+			logger.warn("URLParser.threadPool:");
+			logger.warn(String.format("corePoolSize:%d\n" +
+			    "maximumPoolSize:%d\n" +
+			    "activeCount:%d\n" +
+			    "poolSize:%d\n" +
+			    "workQueueSize:%d\n" +
+			    "workQueueRemainingCapacity:%d", 
+			    threadPool.getCorePoolSize(), 
+			    threadPool.getMaximumPoolSize(), 
+			    threadPool.getActiveCount(), 
+			    threadPool.getPoolSize(),
+			    threadPool.getQueue().size(),
+			    threadPool.getQueue().remainingCapacity()));
+		} catch (MalformedURLException e) {
+			throw new IllegalArgumentException(String.format("Wrong url:%s", strURL), e);
+		}
 	}
 	
 	/**

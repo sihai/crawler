@@ -186,6 +186,7 @@ public class WebCrawler implements Runnable {
 			} else {
 				for (WebURL curURL : assignedURLs) {
 					if (curURL != null) {
+						parseURL(curURL);
 						processPage(curURL);
 						frontier.setProcessed(curURL);
 					}
@@ -221,6 +222,13 @@ public class WebCrawler implements Runnable {
 	 *            the page object that is just fetched and parsed.
 	 */
 	public void visit(Page page) {
+	}
+	
+	/**
+	 * 
+	 * @param webURL
+	 */
+	public void parseURL(WebURL webURL) {
 	}
 
 	private void processPage(WebURL curURL) {

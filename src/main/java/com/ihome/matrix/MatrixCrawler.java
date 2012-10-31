@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.ihome.matrix.parser.url.URLParserHelper;
+
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.url.WebURL;
@@ -39,6 +41,12 @@ public class MatrixCrawler extends WebCrawler {
 
 	@Override
 	public void visit(Page page) {
-		System.out.println(String.format("URL:%s", page.getWebURL().getURL()));
+		//System.out.println(String.format("URL:%s", page.getWebURL().getURL()));
+	}
+	
+	@Override
+	public void parseURL(WebURL webURL) {
+		super.parseURL(webURL);
+		URLParserHelper.parse(webURL.getURL());
 	}
 }

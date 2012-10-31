@@ -13,10 +13,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class CrawlerThreadFactory implements ThreadFactory {
 	
-	private final String prefix;			// 线程名前缀
-	private ThreadGroup group;				// 线程组
-	private boolean  isDaemon;				// 是否设置为精灵线程
-	private AtomicInteger tNo;				// 线程编号, 线程名的一部分
+	private final String prefix;
+	private ThreadGroup group;				
+	private boolean  isDaemon;				
+	private AtomicInteger tNo;				
 	
 	public CrawlerThreadFactory(String prefix) {
 		this(prefix, null, false);
