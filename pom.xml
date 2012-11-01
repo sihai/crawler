@@ -34,8 +34,38 @@
 					<excludes>
 						<exclude>**/*.properties</exclude>
 					</excludes>
+					<archive>  
+  						<manifest>  
+   							<mainClass>com.ihome.matrix.MatrixContrller</mainClass>  
+   							<addClasspath>true</addClasspath>  
+   							<classpathPrefix>lib/</classpathPrefix>  
+  						</manifest>  
+  						<manifestEntries>  
+   							<Class-Path>.</Class-Path>  
+  						</manifestEntries>  
+ 					</archive>
 				</configuration>
-			</plugin>			
+			</plugin>
+			
+			<plugin>  
+    			<groupId>org.apache.maven.plugins</groupId>  
+    			<artifactId>maven-dependency-plugin</artifactId>  
+    			<executions>  
+        			<execution>  
+            			<id>copy-dependencies</id>  
+            			<phase>package</phase>  
+            			<goals>  
+                			<goal>copy-dependencies</goal>  
+            			</goals>  
+			            <configuration>  
+			                <outputDirectory>${project.build.directory}/realse/lib</outputDirectory>  
+			                <overWriteReleases>false</overWriteReleases>  
+			                <overWriteSnapshots>false</overWriteSnapshots>  
+			                <overWriteIfNewer>true</overWriteIfNewer>  
+			            </configuration>
+        			</execution>  
+    			</executions>  
+			</plugin>  		
 		</plugins>
 	</build>
 

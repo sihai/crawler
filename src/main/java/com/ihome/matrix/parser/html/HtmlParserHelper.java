@@ -25,7 +25,7 @@ public class HtmlParserHelper {
 	private static final Log logger = LogFactory.getLog(HtmlParserHelper.class);
 	
 	public static final int DEFAULT_MIN_THREAD = 2;
-	public static int DEFAULT_MAX_THREAD = 8;
+	public static int DEFAULT_MAX_THREAD = 128;
 	public static int DEFAULT_MAX_WORK_QUEUE_SIZE = 2048;
 	public static long MAX_KEEP_ALIVE_TIME = 60;
 
@@ -56,11 +56,24 @@ public class HtmlParserHelper {
 	
 	/**
 	 * 
-	 * @param url
+	 * @param strURL
 	 * @param html
 	 */
-	public void parse(String url, String html) {
-		
+	public static void parse(String strURL, String html) {
+		logger.warn("HtmlParser.threadPool:");
+		logger.warn(String.format("corePoolSize:%d\n" +
+	    		"maximumPoolSize:%d\n" +
+	    		"activeCount:%d\n" +
+	    		"poolSize:%d\n" +
+	    		"workQueueSize:%d\n" +
+	    		"workQueueRemainingCapacity:%d", 
+	    		threadPool.getCorePoolSize(), 
+	    		threadPool.getMaximumPoolSize(), 
+	    		threadPool.getActiveCount(), 
+	    		threadPool.getPoolSize(),
+	    		threadPool.getQueue().size(),
+	    		threadPool.getQueue().remainingCapacity()));
+		threadPool.execute(new ParseHtmlTask(strURL, html));
 	}
 	
 	/**
@@ -80,22 +93,22 @@ public class HtmlParserHelper {
 	 */
 	private static class ParseHtmlTask implements Runnable {
 		
-		private HtmlParser parser;
 		private String url;
 		private String html;
 		
-		public ParseHtmlTask(HtmlParser parser, String url, String html) {
-			this.parser = parser;
+		public ParseHtmlTask(String url, String html) {
 			this.url = url;
 			this.html = html;
 		}
 
 		@Override
 		public void run() {
-			try {
-				parser.parse(url, html);
-			} catch (Throwable t) {
-				logger.error(String.format("Parse html failed, url:%s, html:%s", url, html), t);
+			for(HtmlParser parser : htmlParserChain) {
+				try {
+					parser.parse(url, html);
+				} catch (Throwable t) {
+					logger.error(String.format("Parse html failed, url:%s, html:%s", url, html), t);
+				}
 			}
 		}
 	}

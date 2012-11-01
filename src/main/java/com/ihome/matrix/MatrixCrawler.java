@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import com.ihome.matrix.parser.html.HtmlParserHelper;
 import com.ihome.matrix.parser.url.URLParserHelper;
 
 import edu.uci.ics.crawler4j.crawler.Page;
@@ -25,6 +26,7 @@ public class MatrixCrawler extends WebCrawler {
 	static {
 		acceptPatternList = new ArrayList<Pattern>();
 		//
+		acceptPatternList.add(Pattern.compile("http://skii.tmall.com[\\s|\\S]*"));
 		acceptPatternList.add(Pattern.compile("http://list.tmall.com/search_product.htm\\?[\\s|\\S]+"));
 		acceptPatternList.add(Pattern.compile("http://detail.tmall.com/item.htm\\?[\\s|\\S]*&id=[\\d]+[\\s|\\S]*"));
 	}
@@ -42,6 +44,7 @@ public class MatrixCrawler extends WebCrawler {
 	@Override
 	public void visit(Page page) {
 		//System.out.println(String.format("URL:%s", page.getWebURL().getURL()));
+		HtmlParserHelper.parse(page.getWebURL().getURL(), new String(page.getContentData()));
 	}
 	
 	@Override

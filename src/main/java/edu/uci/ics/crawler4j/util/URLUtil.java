@@ -5,6 +5,7 @@ package edu.uci.ics.crawler4j.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,8 +25,16 @@ import com.iacrqq.util.StringUtil;
  */
 public class URLUtil {
 
+	public static final String DEFAULT_CHARSET = "utf-8";
+	
 	private static final Log logger = LogFactory.getLog(URLUtil.class);
-
+	
+	/**
+	 * 
+	 * @param strURL
+	 * @param parameter
+	 * @return
+	 */
 	public static String getParameter(String strURL, String parameter) {
 
 		if (StringUtil.isEmpty(strURL)) {
@@ -69,7 +78,7 @@ public class URLUtil {
 	 * @param suffix
 	 * @return
 	 */
-	public static File getFile(String strURL, String suffix) {
+	public static File fetchFile(String strURL, String suffix) {
 
 		if (StringUtil.isEmpty(strURL)) {
 			return null;
@@ -99,6 +108,64 @@ public class URLUtil {
 			buffer = null;
 			out.flush();
 			return tmpFile;
+		} catch (MalformedURLException e) {
+			logger.error(String.format("Wrong url:%s", strURL), e);
+		} catch (IOException e) {
+			logger.error(String.format(
+					"Read url:%s or write content to file failed: ", strURL), e);
+		} finally {
+			if (null != in) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					logger.error(e);
+				}
+			}
+			if (null != connection) {
+				connection.disconnect();
+			}
+			if (null != out) {
+				try {
+					out.close();
+				} catch (IOException e) {
+					logger.error(e);
+				}
+			}
+		}
+
+		return null;
+	}
+	
+	public String fetchHtml(String strURL) {
+		return fetchHtml(strURL, DEFAULT_CHARSET);
+	}
+	
+	/**
+	 * 
+	 * @param strURL
+	 * @param charset
+	 * @return
+	 */
+	public static String fetchHtml(String strURL, String charset) {
+		if (StringUtil.isEmpty(strURL)) {
+			return null;
+		}
+
+		HttpURLConnection connection = null;
+		BufferedInputStream in = null;
+		ByteArrayOutputStream out = null;
+		try {
+			URL url = new URL(strURL);
+			connection = (HttpURLConnection) url.openConnection();
+			in = new BufferedInputStream(connection.getInputStream());
+			out = new ByteArrayOutputStream();
+			byte[] buffer = new byte[8192];
+			int count = 0;
+			while (-1 != (count = in.read(buffer, 0, buffer.length))) {
+				out.write(buffer, 0, count);
+			}
+			out.flush();
+			return out.toString(charset);
 		} catch (MalformedURLException e) {
 			logger.error(String.format("Wrong url:%s", strURL), e);
 		} catch (IOException e) {
