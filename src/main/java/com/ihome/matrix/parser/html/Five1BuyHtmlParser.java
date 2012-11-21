@@ -31,8 +31,7 @@ import com.ihome.matrix.enums.StuffStatusEnum;
  */
 public class Five1BuyHtmlParser extends AbstractHtmlParser {
 
-	private static final Log logger = LogFactory
-			.getLog(Five1BuyHtmlParser.class);
+	private static final Log logger = LogFactory.getLog(Five1BuyHtmlParser.class);
 
 	private static final String FIVE_I_BUY_ITEM_ID_XPATH = "//*[@id='container']/DIV[2]/DIV[2]/H1/SPAN";
 	private static final String FIVE_1_BUY_ITEM_NAME_XPATH = "//*[@id='container']/DIV[2]/DIV[2]/H1";
@@ -42,8 +41,7 @@ public class Five1BuyHtmlParser extends AbstractHtmlParser {
 	private static final String FIVE_1_BUY_ITEM_PROMOTION_PRICE_XPATH = "//*[@id='proMainInfo']/xmlns:DIV[2]/xmlns:DIV[1]/xmlns:DL/xmlns:DD[5]/xmlns:p[1]/xmlns:IMG/@src";
 	private static final String FIVE_1_BUY_ITEM_GIFT_XPATH = "";
 
-	private static final Pattern FIVE1_BUY_ITEM_URL_PATTERN = Pattern
-			.compile("^http://item.51buy.com/item-(\\S)*.html(\\S)*");
+	private static final Pattern FIVE1_BUY_ITEM_URL_PATTERN = Pattern.compile("^http://item.51buy.com/item-(\\S)*.html(\\S)*");
 
 	@Override
 	protected boolean accept(String strURL) {
@@ -51,8 +49,8 @@ public class Five1BuyHtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html) {
-		return parseFive1BuyItem(strURL, html);
+	protected ItemDO doParse(String strURL, String html, String charset) {
+		return parseFive1BuyItem(strURL, html, charset);
 	}
 
 	/**
@@ -61,29 +59,27 @@ public class Five1BuyHtmlParser extends AbstractHtmlParser {
 	 * @param html
 	 * @return
 	 */
-	public ItemDO parseFive1BuyItem(String strURL, String html) {
+	public ItemDO parseFive1BuyItem(String strURL, String html, String charset) {
 		try {
 			ItemDO item = new ItemDO();
 			item.setPlatform(PlatformEnum.PLATFORM_51_BUY.getValue());
-			item.setShop(MatrixBridge
-					.getFixedShop(PlatformEnum.PLATFORM_51_BUY));
+			item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_51_BUY));
 			item.setDetailURL(strURL);
 			item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 			item.setNumber(-1L);
 			item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
-			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER
-					.getValue());
+			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());
 			item.setIsDeleted(false);
 
 			// System.out.println(content.toString());
-			InputSource input = new InputSource(new ByteArrayInputStream(
-					html.getBytes()));
+			InputSource input = new InputSource(new ByteArrayInputStream(html.getBytes()));
+			input.setEncoding(charset);
 			DOMParser parser = new DOMParser();
 			parser.parse(input);
 			org.w3c.dom.Document w3cDoc = parser.getDocument();
 			DOMReader domReader = new DOMReader();
 			org.dom4j.Document document = domReader.read(w3cDoc);
-
+			document.setXMLEncoding(charset);
 			// itemId
 			XPath xpath = new DefaultXPath(FIVE_I_BUY_ITEM_ID_XPATH);
 			Object node = xpath.selectSingleNode(document);

@@ -2,6 +2,9 @@ package com.ihome.matrix.parser.html;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -15,10 +18,14 @@ import org.xml.sax.SAXException;
 
 import com.ihome.matrix.bridge.MatrixBridge;
 import com.ihome.matrix.domain.ItemDO;
+import com.ihome.matrix.domain.ShopDO;
 import com.ihome.matrix.enums.FreightFeePayerEnum;
 import com.ihome.matrix.enums.ItemStatusEnum;
 import com.ihome.matrix.enums.PlatformEnum;
+import com.ihome.matrix.enums.ShopStatusEnum;
 import com.ihome.matrix.enums.StuffStatusEnum;
+
+import edu.uci.ics.crawler4j.util.URLUtil;
 
 /**
  * 解析亚马逊商品页面
@@ -29,13 +36,19 @@ public class AmazonHtmlParser extends AbstractHtmlParser {
 	
 	private static final Log logger = LogFactory.getLog(AmazonHtmlParser.class);
 	
+	private static final String AMAZON_PARAMETER_SELLER = "seller";
+	
 	private static final String AMAZON_ITEM_NAME_XPATH = "//*[@id='btAsinTitle']/text()";
+	private static final String AMAZON_ITEM_CATEGORY_XPATH = "//*[@id='nav-subnav']/LI[1]/A";
 	private static final String AMAZON_ITEM_PRICE_XPATH = "//*[@id='actualPriceValue']/B";
 	private static final String AMAZON_ITEM_PHOTO_XPATH = "//*[@id='prodImage']/@src";
 	private static final String AMAZON_ITEM_PHOTO_XPATH_1 = "//*[@id='original-main-image']/@src";
 	
-	private static final Pattern AMAZON_ITEM_URL_PATTERN = Pattern.compile("^http://www.amazon.cn/gp/product/(\\S)*");
-	private static final Pattern AMZON_ITEM_URL_PATTERN_1 = Pattern.compile("^http://www.amazon.cn/(\\S)*/dp/(\\S)*");
+	private static final String AMAZON_SHOP_NAME_XPATH = "//*[@id='handleBuy']/TABLE[3]/TR[4]/TD/DIV/B/A/text()";
+	private static final String AMAZON_SHOP_URL_XPATH =  "//*[@id='handleBuy']/TABLE[3]/TR[4]/TD/DIV/B/A/@href";
+	
+	private static final Pattern AMAZON_ITEM_URL_PATTERN = Pattern.compile("http://www.amazon.cn/gp/product/(\\S)+");
+	private static final Pattern AMZON_ITEM_URL_PATTERN_1 = Pattern.compile("http://www.amazon.cn/(\\S)*/dp/(\\S)+");
 	
 	@Override
 	protected boolean accept(String strURL) {
@@ -43,8 +56,8 @@ public class AmazonHtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html) {
-		ItemDO item = parseAmazonItem(strURL, html);
+	protected ItemDO doParse(String strURL, String html, String charset) {
+		ItemDO item = parseAmazonItem(strURL, html, charset);
 		//System.out.println(item);
 		return item;
 	}
@@ -53,7 +66,7 @@ public class AmazonHtmlParser extends AbstractHtmlParser {
 	 * 
 	 * @return
 	 */
-	private ItemDO parseAmazonItem(String strURL, String html) {
+	private ItemDO parseAmazonItem(String strURL, String html, String charset) {
 		try {
 			  ItemDO item = new ItemDO();
 			  item.setPlatform(PlatformEnum.PLATFORM_AMAZON.getValue());
@@ -64,31 +77,19 @@ public class AmazonHtmlParser extends AbstractHtmlParser {
 			  item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
 			  item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());
 			  item.setIsDeleted(false);
+			  item.setGmtCreate(new Date());
+			  item.setGmtModified(item.getGmtCreate());
 			  
-			  //System.out.println(content.toString());
-			 /* Writer writer = null;
-			  try {
-				  writer = new BufferedWriter(new FileWriter("/home/sihai/test.html"));
-				  writer.write(content.toString());
-				  writer.flush();
-			  } catch (IOException e) {
-				  e.printStackTrace();
-			  } finally{
-				  if(null != writer) {
-					  try {
-						  writer.close();
-					  } catch (IOException e) {
-						  e.printStackTrace();
-					  }
-				  }
-			  }*/
+			  //write2File("/home/sihai/ihome/amazon.html", html, charset);
 			  
 		      InputSource input = new InputSource(new ByteArrayInputStream(html.getBytes()));
 		      DOMParser parser = new DOMParser();
+		      input.setEncoding(charset);
 		      parser.parse(input);
 		      org.w3c.dom.Document w3cDoc = parser.getDocument(); 
 		      DOMReader domReader = new DOMReader();
 		      org.dom4j.Document document = domReader.read(w3cDoc);
+		      document.setXMLEncoding(charset);
 		      
 		      XPath xpath = null;
 		      Object node = null;
@@ -124,6 +125,16 @@ public class AmazonHtmlParser extends AbstractHtmlParser {
 				  item.setName(((org.dom4j.Node)node).getText());
 			  }
 			  
+			  // category and name
+			  List<String> categoryPath = new ArrayList<String>(3);
+			  xpath = new DefaultXPath(AMAZON_ITEM_CATEGORY_XPATH);
+			  node = xpath.selectNodes(document);
+			  if (null != node) {
+				  for (org.dom4j.Node n : (List<org.dom4j.Node>) node) {
+					categoryPath.add(n.getText());
+				  }
+			  }
+			  item.setCategory(generateCategoryTree(PlatformEnum.PLATFORM_AMAZON, categoryPath));
 			  // itemPrice
 			  xpath = new DefaultXPath(AMAZON_ITEM_PRICE_XPATH);
 			  node = xpath.selectSingleNode(document);
@@ -151,6 +162,30 @@ public class AmazonHtmlParser extends AbstractHtmlParser {
 					  item.setLogoURL(generatePhoto(((org.dom4j.Attribute)node).getValue()));
 				  }
 			  }
+			  
+			  // Shop
+			  xpath = new DefaultXPath(AMAZON_SHOP_NAME_XPATH);  
+			  node = xpath.selectSingleNode(document);
+			  if(null != node) {
+				  ShopDO shop = new ShopDO();
+				  shop.setName(((org.dom4j.Node)node).getText());
+				  xpath = new DefaultXPath(AMAZON_SHOP_URL_XPATH);  
+				  node = xpath.selectSingleNode(document);
+				  if(null != node) {
+					  shop.setDetailURL(String.format("%s%s", PlatformEnum.PLATFORM_AMAZON.getUrl(), ((org.dom4j.Attribute)node).getValue()));
+				  }
+				  shop.setShopId(URLUtil.getParameter(shop.getDetailURL(), AMAZON_PARAMETER_SELLER));
+				  shop.setSellerName(shop.getName());
+				  shop.setPlatform(PlatformEnum.PLATFORM_AMAZON.getValue());
+				  shop.setStatus(ShopStatusEnum.SHOP_STATUS_NORMAL.getValue());
+				  shop.setIsDeleted(false);
+				  shop.setGmtCreate(new Date());
+				  shop.setGmtModified(shop.getGmtCreate());
+				  
+				  item.setShop(shop);
+			  }
+			  // Category
+			  
 			  return item;
 		  } catch (IOException e) {
 			  logger.error(e);

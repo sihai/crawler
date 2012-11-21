@@ -15,7 +15,7 @@ public class LusenHtmlParserTest extends TestCase {
 
 	@Test
 	public void test() {
-		parser.parse(URL, URLUtil.fetchHtml(URL, "utf-8"));
-		parser.parse(URL2, URLUtil.fetchHtml(URL2, "utf-8"));
+		parser.parse(URL, URLUtil.fetchHtml(URL, "utf-8"), "utf-8");
+		parser.parse(URL2, URLUtil.fetchHtml(URL2, "utf-8"), "utf-8");
 	}
 }

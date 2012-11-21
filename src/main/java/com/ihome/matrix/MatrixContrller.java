@@ -3,6 +3,10 @@
  */
 package com.ihome.matrix;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -26,6 +30,11 @@ public class MatrixContrller {
 	
 	public static void main(String[] args) {
 		
+		/*if(1 != args.length) {
+			System.err.print("Uage: Matrix configFileName");
+			return;
+		}*/
+		
 		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
@@ -38,11 +47,15 @@ public class MatrixContrller {
         });
 		
 		try {
+			
+			/*Properties properties = new Properties();
+			properties.load(new FileInputStream(args[0]));*/
+			
 			String crawlStorageFolder = "/home/sihai/ihome/matrix";
 			int numberOfCrawlers = 32;
 	
 		    CrawlConfig config = new CrawlConfig();
-		    //config.setResumableCrawling(true);
+		    config.setResumableCrawling(false);
 		    config.setFollowRedirects(true);
 		    config.setMaxDepthOfCrawling(4);
 		    config.setMaxOutgoingLinksToFollow(1000);
@@ -115,6 +128,89 @@ public class MatrixContrller {
 		    // 隐形眼镜/护理液
 		    controller.addSeed("http://list.tmall.com/search_product.htm?spm=3.1000473.295291.120.BEwI8a&active=1&from=sn_1_cat&area_code=330100&search_condition=7&style=g&sort=s&n=60&s=0&cat=50074933#J_crumbs");
 		    
+		    //===============================================
+		    //			Amazon
+		    //===============================================
+		    // 个护健康
+		    controller.addSeed("http://www.amazon.cn/%E4%B8%AA%E6%8A%A4%E5%81%A5%E5%BA%B7/b/ref=sd_allcat_hpc_?ie=UTF8&node=852803051");
+		    // 美容化妆
+		    controller.addSeed("http://www.amazon.cn/%E7%BE%8E%E5%AE%B9%E5%8C%96%E5%A6%86/b/ref=sd_allcat_bty_?ie=UTF8&node=746776051");
+		    
+		    //===============================================
+		    //			Coo8
+		    //===============================================
+		    controller.addSeed("http://www.coo8.com/baojianjiankang/");
+		    controller.addSeed("http://www.coo8.com/meizhuanggehu/");
+		    
+		    //===============================================
+		    //			dangdang
+		    //===============================================
+		    // 
+		    controller.addSeed("http://cosmetic.dangdang.com/");
+		    // 
+		    controller.addSeed("http://health.dangdang.com/");
+		    
+		    //===============================================
+		    //			360Buy
+		    //===============================================
+		    // 个护化妆
+		    controller.addSeed("http://www.360buy.com/beauty.html");
+		    // 母婴
+		    controller.addSeed("http://www.360buy.com/baby.html");
+		    // 营养健康
+		    controller.addSeed("http://www.360buy.com/products/1320-1586-000.html");
+		    // 亚健康调理
+		    controller.addSeed("http://www.360buy.com/products/1320-1587-000.html");
+		    // 健康礼品
+		    controller.addSeed("http://www.360buy.com/products/1320-1588-000.html");
+		    
+		    //===============================================
+		    //			Gome
+		    //===============================================
+		    // 瑜伽垫
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10645563.html");
+		    // 瑜伽服
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10005505.html");
+		    // 瑜伽配件
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10645564.html");
+		    // 健身服
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10005503.html");
+		    // 健身器材
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10645544.html");
+		    // 运动护具
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10645545.html");
+		    // 搏击类
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10645546.html");
+		    // 其它健身器材
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10645547.html");
+		    // 安全避孕
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10005466.html");
+		 	// 情爱玩具
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10005469.html");
+		    // 情趣内衣
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10005470.html");
+		    // 人体润滑
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10005468.html");
+		    // 验孕测孕
+		    controller.addSeed("http://www.gome.com.cn/ec/homeus/jump/category/cat10005467.html");
+		    
+		    //===============================================
+		    //			Newegg
+		    //===============================================
+		    // 美妆、个人护理
+		    controller.addSeed("http://www.newegg.com.cn/Health.htm");
+		    // 母婴用品、玩具
+		    controller.addSeed("http://www.newegg.com.cn/Baby.htm");
+		    // 食品、健康、保健
+		    controller.addSeed("http://www.newegg.com.cn/Food.htm");
+		    
+		    //===============================================
+		    //			No1Shop
+		    //===============================================
+		    controller.addSeed("http://channel.yihaodian.com/meihu/1/");
+		    controller.addSeed("http://channel.yihaodian.com/muying");
+		    controller.addSeed("http://www.yihaodian.com/channel/8704_1/");
+		    
 		    // init 
 		    URLParserHelper.init();
 		    HtmlParserHelper.init();
@@ -126,6 +222,8 @@ public class MatrixContrller {
 		    controller.start(MatrixCrawler.class, numberOfCrawlers);
 		    
 		    Thread.currentThread().join();
+		} catch (IOException e) {
+			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

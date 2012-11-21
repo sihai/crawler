@@ -3,6 +3,7 @@ package com.ihome.matrix.parser.html;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,8 +35,7 @@ import com.ihome.matrix.enums.StuffStatusEnum;
  */
 public class No1ShopHtmlParser extends AbstractHtmlParser {
 
-	private static final Log logger = LogFactory
-			.getLog(No1ShopHtmlParser.class);
+	private static final Log logger = LogFactory.getLog(No1ShopHtmlParser.class);
 
 	private static final String NO1_SHOP_ITEM_NAME_XPATH = "//*[@id='productMainName']";
 	private static final String NO1_SHOP_ITEM_CATEGORY_XPATH = "/xmlns:HTML/xmlns:BODY/xmlns:DIV[5]/xmlns:DIV[1]/xmlns:SPAN/xmlns:A";
@@ -43,8 +43,7 @@ public class No1ShopHtmlParser extends AbstractHtmlParser {
 	private static final String NO1_SHOP_ITEM_PRICE_XPATH = "//*[@id='nonMemberPrice']/xmlns:STRONG";
 	private static final String NO1_SHOP_ITEM_PROMOTION_PRICE_XPATH = "//*[@id='proMainInfo']/xmlns:DIV[2]/xmlns:DIV[1]/xmlns:DL/xmlns:DD[5]/xmlns:p[1]/xmlns:IMG/@src";
 
-	private static final Pattern NO1_SHOP_ITEM_URL_PATTERN = Pattern
-			.compile("^http://www.yihaodian.com/product/(\\S)*");
+	private static final Pattern NO1_SHOP_ITEM_URL_PATTERN = Pattern.compile("^http://www.yihaodian.com/product/(\\S)*");
 
 	@Override
 	protected boolean accept(String strURL) {
@@ -52,8 +51,8 @@ public class No1ShopHtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html) {
-		return parseNo1ShopItem(strURL, html);
+	protected ItemDO doParse(String strURL, String html, String charset) {
+		return parseNo1ShopItem(strURL, html, charset);
 	}
 
 	/**
@@ -62,42 +61,36 @@ public class No1ShopHtmlParser extends AbstractHtmlParser {
 	 * @param html
 	 * @return
 	 */
-	public ItemDO parseNo1ShopItem(String strURL, String html) {
+	public ItemDO parseNo1ShopItem(String strURL, String html, String charset) {
 		try {
 			ItemDO item = new ItemDO();
 			item.setPlatform(PlatformEnum.PLATFORM_NO_1_SHOP.getValue());
-			item.setShop(MatrixBridge
-					.getFixedShop(PlatformEnum.PLATFORM_NO_1_SHOP));
+			item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_NO_1_SHOP));
 			item.setDetailURL(strURL);
 			item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 			item.setNumber(-1L);
 			item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
-			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER
-					.getValue());
+			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());
 			item.setIsDeleted(false);
+			item.setGmtCreate(new Date());
+			item.setGmtModified(item.getGmtCreate());
 
-			// System.out.println(content.toString());
-			InputSource input = new InputSource(new ByteArrayInputStream(
-					html.getBytes()));
+			//write2File("/home/sihai/ihome/no1shop.html", html, charset);
+			
+			InputSource input = new InputSource(new ByteArrayInputStream(html.getBytes()));
+			input.setEncoding(charset);
 			DOMParser parser = new DOMParser();
 			parser.parse(input);
 			org.w3c.dom.Document w3cDoc = parser.getDocument();
 			DOMReader domReader = new DOMReader();
 			org.dom4j.Document document = domReader.read(w3cDoc);
-
+			document.setXMLEncoding(charset);
 			Map<String, String> nameSpaces = new HashMap<String, String>();
 			nameSpaces.put("xmlns", "http://www.w3.org/1999/xhtml");
-			SimpleNamespaceContext context = new SimpleNamespaceContext(
-					nameSpaces);
+			SimpleNamespaceContext context = new SimpleNamespaceContext(nameSpaces);
 
 			// itemId
-			/*
-			 * XPath xpath = new DefaultXPath(SUNING_ITEM_ID_XPATH);
-			 * xpath.setNamespaceContext(context); Object node =
-			 * xpath.selectSingleNode(document); if(null != node) {
-			 * item.setName(((org.dom4j.Node)node).getText()); }
-			 */
-
+		
 			int index0 = strURL.indexOf("/product/");
 			if (-1 != index0) {
 				item.setItemId(strURL.substring(index0 + "/product/".length(),

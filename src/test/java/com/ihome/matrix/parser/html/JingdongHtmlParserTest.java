@@ -8,12 +8,23 @@ import edu.uci.ics.crawler4j.util.URLUtil;
 
 public class JingdongHtmlParserTest extends TestCase {
 
-	public static final String URL = "http://www.360buy.com/product/717554.html";
+	public static final String[] URLS = new String[] {
+		"http://www.360buy.com/product/717554.html",
+		"http://www.360buy.com/product/620876.html"
+	};
 	
-	private JingdongHtmlParser parser = new JingdongHtmlParser();
+	private static JingdongHtmlParser parser = new JingdongHtmlParser();
 
 	@Test
 	public void test() {
-		parser.parse(URL, URLUtil.fetchHtml(URL, "utf-8"));
+		for(String url : URLS) {
+			parser.parse(url, URLUtil.fetchHtml(url, "gb2312"), "gb2312");
+		}
+	}
+	
+	public static void main(String[] args) {
+		for(String url : URLS) {
+			parser.parse(url, URLUtil.fetchHtml(url, "gb2312"), "gb2312");
+		}
 	}
 }

@@ -9,12 +9,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.iacrqq.util.StringUtil;
 
@@ -28,6 +31,9 @@ public class URLUtil {
 	public static final String DEFAULT_CHARSET = "utf-8";
 	
 	private static final Log logger = LogFactory.getLog(URLUtil.class);
+	
+	// XXX Just for test
+	private static final HttpClient httpClient = new DefaultHttpClient();
 	
 	/**
 	 * 
@@ -84,7 +90,6 @@ public class URLUtil {
 			return null;
 		}
 
-		HttpURLConnection connection = null;
 		BufferedInputStream in = null;
 		BufferedOutputStream out = null;
 		try {
@@ -93,10 +98,10 @@ public class URLUtil {
 			if (StringUtil.isEmpty(fileName)) {
 				return null;
 			}
-			fileName = fileName.substring(fileName.lastIndexOf("/")
-					+ "/".length());
-			connection = (HttpURLConnection) url.openConnection();
-			in = new BufferedInputStream(connection.getInputStream());
+			fileName = fileName.substring(fileName.lastIndexOf("/") + "/".length());
+			HttpGet httpGet = new HttpGet(strURL);
+			HttpResponse httpResponse = httpClient.execute(httpGet);
+			in = new BufferedInputStream(httpResponse.getEntity().getContent());
 			File tmpFile = File.createTempFile(fileName, suffix);
 			tmpFile.deleteOnExit();
 			out = new BufferedOutputStream(new FileOutputStream(tmpFile));
@@ -121,9 +126,7 @@ public class URLUtil {
 					logger.error(e);
 				}
 			}
-			if (null != connection) {
-				connection.disconnect();
-			}
+			
 			if (null != out) {
 				try {
 					out.close();
@@ -151,13 +154,13 @@ public class URLUtil {
 			return null;
 		}
 
-		HttpURLConnection connection = null;
 		BufferedInputStream in = null;
 		ByteArrayOutputStream out = null;
 		try {
-			URL url = new URL(strURL);
-			connection = (HttpURLConnection) url.openConnection();
-			in = new BufferedInputStream(connection.getInputStream());
+			HttpGet httpGet = new HttpGet(strURL);
+			HttpResponse httpResponse = httpClient.execute(httpGet);
+			
+			in = new BufferedInputStream(httpResponse.getEntity().getContent());
 			out = new ByteArrayOutputStream();
 			byte[] buffer = new byte[8192];
 			int count = 0;
@@ -179,9 +182,7 @@ public class URLUtil {
 					logger.error(e);
 				}
 			}
-			if (null != connection) {
-				connection.disconnect();
-			}
+			
 			if (null != out) {
 				try {
 					out.close();

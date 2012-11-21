@@ -34,8 +34,7 @@ import com.ihome.matrix.enums.StuffStatusEnum;
  */
 public class RedBabyHtmlParser extends AbstractHtmlParser {
 
-	private static final Log logger = LogFactory
-			.getLog(RedBabyHtmlParser.class);
+	private static final Log logger = LogFactory.getLog(RedBabyHtmlParser.class);
 
 	private static final String RED_BABY_ITEM_ID_XPATH = "//*[@id='commonBasicInfo']/xmlns:UL/xmlns:LI[1]";
 	private static final String RED_BABY_ITEM_NAME_XPATH = "//*[@id='pName']/xmlns:H1/text()";
@@ -45,8 +44,7 @@ public class RedBabyHtmlParser extends AbstractHtmlParser {
 	private static final String RED_BABY_ITEM_PROMOTION_PRICE_XPATH = "//*[@id='specP']/xmlns:DIV[2]/xmlns:SPAN[2]";
 	private static final String RED_BABY_ITEM_GIFT_XPATH = "";
 	
-	private static final Pattern RED_BABY_ITEM_URL_PATTERN = Pattern
-			.compile("^http://www.redbaby.com.cn/(\\S)+/(\\S)*.html(\\S)*");
+	private static final Pattern RED_BABY_ITEM_URL_PATTERN = Pattern.compile("^http://www.redbaby.com.cn/(\\S)+/(\\S)*.html(\\S)*");
 
 	@Override
 	protected boolean accept(String strURL) {
@@ -54,8 +52,8 @@ public class RedBabyHtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html) {
-		return parseRedBabyItem(strURL, html);
+	protected ItemDO doParse(String strURL, String html, String charset) {
+		return parseRedBabyItem(strURL, html, charset);
 	}
 	
 	/**
@@ -64,33 +62,30 @@ public class RedBabyHtmlParser extends AbstractHtmlParser {
 	 * @param html
 	 * @return
 	 */
-	public ItemDO parseRedBabyItem(String strURL, String html) {
+	public ItemDO parseRedBabyItem(String strURL, String html, String charset) {
 		try {
 			ItemDO item = new ItemDO();
 			item.setPlatform(PlatformEnum.PLATFORM_RED_BABY.getValue());
-			item.setShop(MatrixBridge
-					.getFixedShop(PlatformEnum.PLATFORM_RED_BABY));
+			item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_RED_BABY));
 			item.setDetailURL(strURL);
 			item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 			item.setNumber(-1L);
 			item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
-			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER
-					.getValue());
+			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());
 			item.setIsDeleted(false);
 
 			// System.out.println(content.toString());
-			InputSource input = new InputSource(new ByteArrayInputStream(
-					html.getBytes()));
+			InputSource input = new InputSource(new ByteArrayInputStream(html.getBytes()));
+			input.setEncoding(charset);
 			DOMParser parser = new DOMParser();
 			parser.parse(input);
 			org.w3c.dom.Document w3cDoc = parser.getDocument();
 			DOMReader domReader = new DOMReader();
 			org.dom4j.Document document = domReader.read(w3cDoc);
-
+			document.setXMLEncoding(charset);
 			Map<String, String> nameSpaces = new HashMap<String, String>();
 			nameSpaces.put("xmlns", "http://www.w3.org/1999/xhtml");
-			SimpleNamespaceContext context = new SimpleNamespaceContext(
-					nameSpaces);
+			SimpleNamespaceContext context = new SimpleNamespaceContext(nameSpaces);
 
 			// itemId
 			XPath xpath = new DefaultXPath(RED_BABY_ITEM_ID_XPATH);

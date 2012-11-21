@@ -14,6 +14,6 @@ public class Five1BuyHtmlParserTest extends TestCase {
 
 	@Test
 	public void test() {
-		parser.parse(URL, URLUtil.fetchHtml(URL, "utf-8"));
+		parser.parse(URL, URLUtil.fetchHtml(URL, "gb2312"), "gb2312");
 	}
 }

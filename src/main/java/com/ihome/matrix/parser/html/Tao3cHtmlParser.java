@@ -44,8 +44,7 @@ public class Tao3cHtmlParser extends AbstractHtmlParser {
 	private static final String TAO3C_ITEM_PROMOTION_PRICE_XPATH = "//*[@id='dom_sale_price']";
 	private static final String TAO3C_ITEM_GIFT_XPATH = "";
 
-	private static final Pattern TAO3C_ITEM_URL_PATTERN = Pattern
-			.compile("^http://www.tao3c.com/product/(\\S)*.html(\\S)*");
+	private static final Pattern TAO3C_ITEM_URL_PATTERN = Pattern.compile("^http://www.tao3c.com/product/(\\S)*.html(\\S)*");
 
 	@Override
 	protected boolean accept(String strURL) {
@@ -53,8 +52,8 @@ public class Tao3cHtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html) {
-		return parseTao3cItem(strURL, html);
+	protected ItemDO doParse(String strURL, String html, String charset) {
+		return parseTao3cItem(strURL, html, charset);
 	}
 
 	/**
@@ -62,7 +61,7 @@ public class Tao3cHtmlParser extends AbstractHtmlParser {
 	 * @param content
 	 * @return
 	 */
-	public ItemDO parseTao3cItem(String strURL, String html) {
+	public ItemDO parseTao3cItem(String strURL, String html, String charset) {
 		try {
 			ItemDO item = new ItemDO();
 			item.setPlatform(PlatformEnum.PLATFORM_TAO3C.getValue());
@@ -71,32 +70,20 @@ public class Tao3cHtmlParser extends AbstractHtmlParser {
 			item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 			item.setNumber(-1L);
 			item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
-			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER
-					.getValue());
+			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());
 			item.setIsDeleted(false);
 
-			// System.out.println(content.toString());
-			/*
-			 * Writer writer = null; try { writer = new BufferedWriter(new
-			 * FileWriter("/home/sihai/test.html")); writer.write(new
-			 * String(content.getContent(), "gbk")); writer.flush(); } catch
-			 * (IOException e) { e.printStackTrace(); } finally{ if(null !=
-			 * writer) { try { writer.close(); } catch (IOException e) {
-			 * e.printStackTrace(); } } }
-			 */
-
-			InputSource input = new InputSource(new ByteArrayInputStream(
-					html.getBytes()));
+			InputSource input = new InputSource(new ByteArrayInputStream(html.getBytes()));
+			input.setEncoding(charset);
 			DOMParser parser = new DOMParser();
 			parser.parse(input);
 			org.w3c.dom.Document w3cDoc = parser.getDocument();
 			DOMReader domReader = new DOMReader();
 			org.dom4j.Document document = domReader.read(w3cDoc);
-
+			document.setXMLEncoding(charset);
 			Map<String, String> nameSpaces = new HashMap<String, String>();
 			nameSpaces.put("xmlns", "http://www.w3.org/1999/xhtml");
-			SimpleNamespaceContext context = new SimpleNamespaceContext(
-					nameSpaces);
+			SimpleNamespaceContext context = new SimpleNamespaceContext(nameSpaces);
 
 			// itemId
 			XPath xpath = new DefaultXPath(TAO3C_ITEM_ID_XPATH);

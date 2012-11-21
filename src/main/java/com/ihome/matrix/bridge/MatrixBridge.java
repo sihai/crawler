@@ -126,7 +126,10 @@ public class MatrixBridge {
 		item.setCategory(item.getCategory());
 		item.setShop(item.getShop());
 		itemSolrIndexer.upate(item);
-		shopSolrIndexer.upate(item.getShop());
+		// 非平台店铺, 才更索引
+		if(null == PlatformEnum.toEnum(item.getShop().getPlatform())) {
+			shopSolrIndexer.upate(item.getShop());
+		}
 	}
 	
 	public void close() {

@@ -41,8 +41,7 @@ public class SuningHtmlParser extends AbstractHtmlParser {
 	private static final String SUNING_ITEM_PRICE_XPATH = "//*[@id='tellMe']/xmlns:A[1]/@href";
 	private static final String SUNING_ITEM_PHOTO_XPATH = "//*[@id='preView_box']/xmlns:DIV/xmlns:UL/xmlns:LI[1]/xmlns:IMG/@src2";
 
-	private static final Pattern SUNING_ITEM_URL_PATTERN = Pattern
-			.compile("^http://www.suning.com/emall/prd_(\\S)+_.html(\\S)*");
+	private static final Pattern SUNING_ITEM_URL_PATTERN = Pattern.compile("^http://www.suning.com/emall/prd_(\\S)+_.html(\\S)*");
 
 	@Override
 	protected boolean accept(String strURL) {
@@ -50,8 +49,8 @@ public class SuningHtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html) {
-		return parseSuningItem(strURL, html);
+	protected ItemDO doParse(String strURL, String html, String charset) {
+		return parseSuningItem(strURL, html, charset);
 	}
 
 	/**
@@ -60,33 +59,30 @@ public class SuningHtmlParser extends AbstractHtmlParser {
 	 * @param html
 	 * @return
 	 */
-	public ItemDO parseSuningItem(String strURL, String html) {
+	public ItemDO parseSuningItem(String strURL, String html, String charset) {
 		try {
 			ItemDO item = new ItemDO();
 			item.setPlatform(PlatformEnum.PLATFORM_SUNING.getValue());
-			item.setShop(MatrixBridge
-					.getFixedShop(PlatformEnum.PLATFORM_SUNING));
+			item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_SUNING));
 			item.setDetailURL(strURL);
 			item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 			item.setNumber(-1L);
 			item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
-			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER
-					.getValue());
+			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());
 			item.setIsDeleted(false);
 
 			// System.out.println(content.toString());
-			InputSource input = new InputSource(new ByteArrayInputStream(
-					html.getBytes()));
+			InputSource input = new InputSource(new ByteArrayInputStream(html.getBytes()));
+			input.setEncoding(charset);
 			DOMParser parser = new DOMParser();
 			parser.parse(input);
 			org.w3c.dom.Document w3cDoc = parser.getDocument();
 			DOMReader domReader = new DOMReader();
 			org.dom4j.Document document = domReader.read(w3cDoc);
-
+			document.setXMLEncoding(charset);
 			Map<String, String> nameSpaces = new HashMap<String, String>();
 			nameSpaces.put("xmlns", "http://www.w3.org/1999/xhtml");
-			SimpleNamespaceContext context = new SimpleNamespaceContext(
-					nameSpaces);
+			SimpleNamespaceContext context = new SimpleNamespaceContext(nameSpaces);
 
 			// itemId
 			/*

@@ -45,8 +45,7 @@ public class LusenHtmlParser extends AbstractHtmlParser {
 	private static final String LUSEN_ITEM_PROMOTION_PRICE_XPATH = "//*[@id='DivPanicBuyOrComity']/xmlns:DIV[2]/xmlns:SPAN[2]/xml:FONT";
 	private static final String LUSEN_ITEM_GIFT_XPATH = "";
 	
-	private static final Pattern LUSEN_ITEM_URL_PATTERN = Pattern
-			.compile("^http://www.lusen.com/Product/ProductInfo.aspx\\?(\\S)*");
+	private static final Pattern LUSEN_ITEM_URL_PATTERN = Pattern.compile("^http://www.lusen.com/Product/ProductInfo.aspx\\?(\\S)*");
 
 	@Override
 	protected boolean accept(String strURL) {
@@ -54,8 +53,8 @@ public class LusenHtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html) {
-		return parseLusenItem(strURL, html);
+	protected ItemDO doParse(String strURL, String html, String charset) {
+		return parseLusenItem(strURL, html, charset);
 	}
 
 	/**
@@ -63,7 +62,7 @@ public class LusenHtmlParser extends AbstractHtmlParser {
 	 * @param content
 	 * @return
 	 */
-	public ItemDO parseLusenItem(String strURL, String html) {
+	public ItemDO parseLusenItem(String strURL, String html, String charset) {
 		try {
 			ItemDO item = new ItemDO();
 			item.setPlatform(PlatformEnum.PLATFORM_LUSEN.getValue());
@@ -72,40 +71,22 @@ public class LusenHtmlParser extends AbstractHtmlParser {
 			item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 			item.setNumber(-1L);
 			item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
-			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER
-					.getValue());
+			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());
 			item.setIsDeleted(false);
 
-			// System.out.println(content.toString());
-			/*
-			 * Writer writer = null; try { writer = new BufferedWriter(new
-			 * FileWriter("/home/sihai/test.html"));
-			 * writer.write(content.toString()); writer.flush(); } catch
-			 * (IOException e) { e.printStackTrace(); } finally{ if(null !=
-			 * writer) { try { writer.close(); } catch (IOException e) {
-			 * e.printStackTrace(); } } }
-			 */
-
-			InputSource input = new InputSource(new ByteArrayInputStream(
-					html.getBytes()));
+			InputSource input = new InputSource(new ByteArrayInputStream(html.getBytes()));
+			input.setEncoding(charset);
 			DOMParser parser = new DOMParser();
 			parser.parse(input);
 			org.w3c.dom.Document w3cDoc = parser.getDocument();
 			DOMReader domReader = new DOMReader();
 			org.dom4j.Document document = domReader.read(w3cDoc);
-
+			document.setXMLEncoding(charset);
 			Map<String, String> nameSpaces = new HashMap<String, String>();
 			nameSpaces.put("xmlns", "http://www.w3.org/1999/xhtml");
-			SimpleNamespaceContext context = new SimpleNamespaceContext(
-					nameSpaces);
+			SimpleNamespaceContext context = new SimpleNamespaceContext(nameSpaces);
 
 			// itemId
-			/*
-			 * XPath xpath = new DefaultXPath(SUNING_ITEM_ID_XPATH);
-			 * xpath.setNamespaceContext(context); Object node =
-			 * xpath.selectSingleNode(document); if(null != node) {
-			 * item.setName(((org.dom4j.Node)node).getText()); }
-			 */
 			item.setItemId(URLUtil.getParameter(strURL, "id"));
 
 			// itemName

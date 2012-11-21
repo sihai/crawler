@@ -46,6 +46,7 @@ public class HtmlParserHelper {
 		
 		// parser chain
 		htmlParserChain = new ArrayList<HtmlParser>(16);
+		htmlParserChain.add(new AmazonHtmlParser());
 		
 		// thread pool
 		workQueue = new LinkedBlockingQueue<Runnable>(workQueueSize);
@@ -58,8 +59,9 @@ public class HtmlParserHelper {
 	 * 
 	 * @param strURL
 	 * @param html
+	 * @param charset
 	 */
-	public static void parse(String strURL, String html) {
+	public static void parse(String strURL, String html, String charset) {
 		logger.warn("HtmlParser.threadPool:");
 		logger.warn(String.format("corePoolSize:%d\n" +
 	    		"maximumPoolSize:%d\n" +
@@ -73,7 +75,7 @@ public class HtmlParserHelper {
 	    		threadPool.getPoolSize(),
 	    		threadPool.getQueue().size(),
 	    		threadPool.getQueue().remainingCapacity()));
-		threadPool.execute(new ParseHtmlTask(strURL, html));
+		threadPool.execute(new ParseHtmlTask(strURL, html, charset));
 	}
 	
 	/**
@@ -95,17 +97,19 @@ public class HtmlParserHelper {
 		
 		private String url;
 		private String html;
+		private String charset;
 		
-		public ParseHtmlTask(String url, String html) {
+		public ParseHtmlTask(String url, String html, String charset) {
 			this.url = url;
 			this.html = html;
+			this.charset = charset;
 		}
 
 		@Override
 		public void run() {
 			for(HtmlParser parser : htmlParserChain) {
 				try {
-					parser.parse(url, html);
+					parser.parse(url, html, charset);
 				} catch (Throwable t) {
 					logger.error(String.format("Parse html failed, url:%s, html:%s", url, html), t);
 				}

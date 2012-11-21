@@ -15,7 +15,7 @@ public class RedBabyHtmlParserTest extends TestCase {
 
 	@Test
 	public void test() {
-		parser.parse(URL, URLUtil.fetchHtml(URL, "utf-8"));
-		parser.parse(URL2, URLUtil.fetchHtml(URL, "utf-8"));
+		parser.parse(URL, URLUtil.fetchHtml(URL, "utf-8"), "utf-8");
+		parser.parse(URL2, URLUtil.fetchHtml(URL, "utf-8"), "utf-8");
 	}
 }
