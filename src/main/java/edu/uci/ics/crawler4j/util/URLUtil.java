@@ -9,17 +9,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.iacrqq.util.StringUtil;
+import com.ihome.matrix.MatrixHttpClientWrap;
 
 /**
  * 
@@ -29,11 +29,9 @@ import com.iacrqq.util.StringUtil;
 public class URLUtil {
 
 	public static final String DEFAULT_CHARSET = "utf-8";
+	public static final String USER_AGENT = "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.89 Safari/537.1";
 	
 	private static final Log logger = LogFactory.getLog(URLUtil.class);
-	
-	// XXX Just for test
-	private static final HttpClient httpClient = new DefaultHttpClient();
 	
 	/**
 	 * 
@@ -100,7 +98,7 @@ public class URLUtil {
 			}
 			fileName = fileName.substring(fileName.lastIndexOf("/") + "/".length());
 			HttpGet httpGet = new HttpGet(strURL);
-			HttpResponse httpResponse = httpClient.execute(httpGet);
+			HttpResponse httpResponse = MatrixHttpClientWrap.execute(httpGet);
 			in = new BufferedInputStream(httpResponse.getEntity().getContent());
 			File tmpFile = File.createTempFile(fileName, suffix);
 			tmpFile.deleteOnExit();
@@ -150,6 +148,20 @@ public class URLUtil {
 	 * @return
 	 */
 	public static String fetchHtml(String strURL, String charset) {
+		try {
+			return new String(fetchContent(strURL, charset), charset);
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param strURL
+	 * @param charset
+	 * @return
+	 */
+	public static byte[] fetchContent(String strURL, String charset) {
 		if (StringUtil.isEmpty(strURL)) {
 			return null;
 		}
@@ -158,8 +170,7 @@ public class URLUtil {
 		ByteArrayOutputStream out = null;
 		try {
 			HttpGet httpGet = new HttpGet(strURL);
-			HttpResponse httpResponse = httpClient.execute(httpGet);
-			
+			HttpResponse httpResponse = MatrixHttpClientWrap.execute(httpGet);
 			in = new BufferedInputStream(httpResponse.getEntity().getContent());
 			out = new ByteArrayOutputStream();
 			byte[] buffer = new byte[8192];
@@ -168,7 +179,7 @@ public class URLUtil {
 				out.write(buffer, 0, count);
 			}
 			out.flush();
-			return out.toString(charset);
+			return out.toByteArray();
 		} catch (MalformedURLException e) {
 			logger.error(String.format("Wrong url:%s", strURL), e);
 		} catch (IOException e) {

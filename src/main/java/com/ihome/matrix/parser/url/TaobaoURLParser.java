@@ -51,7 +51,7 @@ public class TaobaoURLParser extends AbstractURLParser {
 	private static final String APP_KEY = "12553640";
     private static final String SECRET = "de463fd7cc82a51b060ffe6a11e345f9";
 
-    private static final TaobaoClient client = new DefaultTaobaoClient(GATEWAY, APP_KEY, SECRET);
+    private static final TaobaoClient client = new DefaultTaobaoClient(GATEWAY, APP_KEY, SECRET, "json", 5000, 15000);
     
     private PlatformEnum platform = PlatformEnum.PLATFORM_TMALL;
 
@@ -135,7 +135,7 @@ public class TaobaoURLParser extends AbstractURLParser {
 		igoShop.setGmtCreate(new Date());
 		igoShop.setGmtModified(igoShop.getGmtCreate());
 		igoShop.setName(shop.getTitle());
-		igoShop.setPicturePath("http://logo.taobao.com/" + shop.getPicPath());
+		igoShop.setLogoURL("http://logo.taobao.com/" + shop.getPicPath());
 		igoShop.setPlatform(PlatformEnum.PLATFORM_TAOBAO.getValue());
 		igoShop.setSellerName(shop.getNick());
 		igoShop.setStatus(ShopStatusEnum.SHOP_STATUS_NORMAL.getValue());

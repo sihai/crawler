@@ -49,9 +49,15 @@ public abstract class AbstractHtmlParser implements HtmlParser {
 	}
 
 	@Override
-	public void parse(String strURL, String html, String charset) {
+	public void parse(String strURL, byte[] content, String charset) {
 		if(accept(strURL)) {
-			ItemDO item = doParse(strURL, html, charset);
+			ItemDO item = doParse(strURL, content, charset);
+			if(null == item || null == item.getName()) {
+				logger.error(String.format("Parse url:%s failed", strURL));
+				/*write2File("/home/sihai/error.html", html, charset);
+				doParse(strURL, html, charset);
+				System.exit(0);*/
+			}
 			//System.out.println(item);
 			if(null != item) {
 				MatrixBridge.sync(item);
@@ -69,20 +75,36 @@ public abstract class AbstractHtmlParser implements HtmlParser {
 	/**
 	 * 
 	 * @param strURL
-	 * @param html
+	 * @param cotent
 	 * @param charset
 	 * @return
 	 */
-	protected abstract ItemDO doParse(String strURL, String html, String charset);
+	protected abstract ItemDO doParse(String strURL, byte[] content, String charset);
 	
 	/**
 	 * 
+	 * @param strURL
 	 * @param src
 	 * @return
 	 */
-	protected String generatePhoto(String src) {
-		// Do nothing
-		return src;
+	protected String generatePhoto(String strURL, String src) {
+		if(src.startsWith("http")) {
+			// Do nothing
+			return src;
+		} else {
+			int index0 = strURL.indexOf("http://");
+			if(-1 != index0) {
+				int index1 = strURL.indexOf("/", index0 + "http://".length());
+				if(-1 != index1) {
+					return strURL.substring(0, index1) + (src.startsWith("/") ? "" : "/") + src;
+				} else {
+					return strURL.substring(0) + (src.startsWith("/") ? "" : "/") + src;
+				}
+			} else {
+				// NOT Possiable
+				throw new RuntimeException(String.format("Wrong url:%s", strURL));
+			}
+		}
 	}
 	
 	/**
@@ -91,14 +113,14 @@ public abstract class AbstractHtmlParser implements HtmlParser {
 	 * @param categoryPath
 	 * @return
 	 */
-	protected static CategoryDO generateCategoryTree(PlatformEnum platform, List<String> categoryPath) {
+	protected static CategoryDO generateCategoryTree(int platform, List<String> categoryPath) {
 		  CategoryDO parent = null;
 		  CategoryDO cat = null;
 		  for(String catName : categoryPath) {
 			  cat = new CategoryDO();
 			  cat.setName(catName);
 			  cat.setDescription(cat.getName());
-			  cat.setPlatform(platform.getValue());
+			  cat.setPlatform(platform);
 			  cat.setStatus(CategoryStatusEnum.NORMAL.getValue());
 			  cat.setRank(0);
 			  cat.setIsDeleted(false);

@@ -1,5 +1,6 @@
 package com.ihome.matrix.parser.html;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,8 +39,8 @@ public class GomeHtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html, String charset) {
-		return parseGomeItem(strURL, html, charset);
+	protected ItemDO doParse(String strURL, byte[] content, String charset) {
+		return parseItem(strURL, content, charset);
 	}
 	
 	/**
@@ -47,7 +48,7 @@ public class GomeHtmlParser extends AbstractHtmlParser {
 	 * @param content
 	 * @return
 	 */
-	public ItemDO parseGomeItem(String strURL, String html, String charset) {
+	public ItemDO parseItem(String strURL, byte[] content, String charset) {
 
 		ItemDO item = new ItemDO();
 		item.setPlatform(PlatformEnum.PLATFORM_GOME.getValue());
@@ -61,6 +62,13 @@ public class GomeHtmlParser extends AbstractHtmlParser {
 		item.setGmtCreate(new Date());
 		item.setGmtModified(item.getGmtCreate());
 
+		String html = null;
+		try {
+			html = new String(content, charset);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(String.format("Please make sure the charset of url:%s, try to use charset:%s", strURL, charset));
+		}
+		
 		//write2File("/home/sihai/ihome/gome.html", html, charset);
 		
 		Document document = Jsoup.parse(html);
@@ -92,7 +100,7 @@ public class GomeHtmlParser extends AbstractHtmlParser {
 		}
 
 		// 生成类目树
-		CategoryDO category = generateCategoryTree(PlatformEnum.PLATFORM_GOME, categoryPath);
+		CategoryDO category = generateCategoryTree(PlatformEnum.PLATFORM_GOME.getValue(), categoryPath);
 		item.setCategory(category);
 
 		// itemPrice
@@ -106,7 +114,7 @@ public class GomeHtmlParser extends AbstractHtmlParser {
 		// photo
 		es = document.select("img#pic_1");
 		if (!es.isEmpty()) {
-			item.setLogoURL(generatePhoto(es.first().attr("bgpic")));
+			item.setLogoURL(generatePhoto(strURL, es.first().attr("bgpic")));
 		}
 
 		return item;

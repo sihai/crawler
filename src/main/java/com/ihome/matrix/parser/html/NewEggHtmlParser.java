@@ -1,6 +1,7 @@
 package com.ihome.matrix.parser.html;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,16 +44,18 @@ public class NewEggHtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html, String charset) {
-		return parseNewEggItem(strURL, html, charset);
+	protected ItemDO doParse(String strURL, byte[] content, String charset) {
+		return parseItem(strURL, content, charset);
 	}
 
 	/**
 	 * 
+	 * @param strURL
 	 * @param content
+	 * @param charset
 	 * @return
 	 */
-	public ItemDO parseNewEggItem(String strURL, String html, String charset) {
+	public ItemDO parseItem(String strURL, byte[] content, String charset) {
 		
 		ItemDO item = new ItemDO();
 		item.setPlatform(PlatformEnum.PLATFORM_NEW_EGG.getValue());
@@ -65,7 +68,13 @@ public class NewEggHtmlParser extends AbstractHtmlParser {
 		item.setIsDeleted(false);
 		item.setGmtCreate(new Date());
 		item.setGmtModified(item.getGmtCreate());
-
+		
+		String html = null;
+		try {
+			html = new String(content, charset);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(String.format("Please make sure the charset of url:%s, try to use charset:%s", strURL, charset));
+		}
 		//write2File("/home/sihai/ihome/newegg.html", html, charset);
 		
 		Document document = Jsoup.parse(html);
@@ -102,7 +111,7 @@ public class NewEggHtmlParser extends AbstractHtmlParser {
 		}
 
 		// 生成类目树
-		CategoryDO category = generateCategoryTree(PlatformEnum.PLATFORM_NEW_EGG, categoryPath);
+		CategoryDO category = generateCategoryTree(PlatformEnum.PLATFORM_NEW_EGG.getValue(), categoryPath);
 		item.setCategory(category);
 
 		// itemPrice
@@ -115,7 +124,7 @@ public class NewEggHtmlParser extends AbstractHtmlParser {
 		// photo
 		es = document.select("dd#thumbnails1 > div.noExtra > ul.moveable > li > a");
 		if (!es.isEmpty()) {
-			item.setLogoURL(generatePhoto(es.first().attr("ref2")));
+			item.setLogoURL(generatePhoto(strURL, es.first().attr("ref2")));
 		}
 
 		return item;

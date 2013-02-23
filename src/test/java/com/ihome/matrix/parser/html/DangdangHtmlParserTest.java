@@ -12,10 +12,10 @@ public class DangdangHtmlParserTest {
 
 	@Test
 	public void test() {
-		parser.parse(URL, URLUtil.fetchHtml(URL, "gb2312"), "gb2312");
+		parser.parse(URL, URLUtil.fetchContent(URL, "gb2312"), "gb2312");
 	}
 	
 	public static void main(String[] args) {
-		parser.parse(URL, URLUtil.fetchHtml(URL, "gb2312"), "gb2312");
+		parser.parse(URL, URLUtil.fetchContent(URL, "gb2312"), "gb2312");
 	}
 }

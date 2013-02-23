@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -28,8 +29,8 @@ public class URLParserHelper {
 
 	private static final Log logger = LogFactory.getLog(URLParserHelper.class);
 	
-	public static final int DEFAULT_MIN_THREAD = 2;
-	public static int DEFAULT_MAX_THREAD = 8;
+	public static final int DEFAULT_MIN_THREAD = 32;
+	public static int DEFAULT_MAX_THREAD = 64;
 	public static int DEFAULT_MAX_WORK_QUEUE_SIZE = 2048;
 	public static long MAX_KEEP_ALIVE_TIME = 60;
 
@@ -88,10 +89,10 @@ public class URLParserHelper {
 		try {
 			URLParser parser = urlParserMap.get(new URL(strURL).getHost());
 			if(null == parser) {
-				logger.info(String.format("No parser for url:%s", strURL));
+				//logger.info(String.format("No parser for url:%s", strURL));
 				return;
 			}
-			threadPool.execute(new ParseURLTask(parser, strURL));
+			
 			logger.warn("URLParser.threadPool:");
 			logger.warn(String.format("corePoolSize:%d\n" +
 			    "maximumPoolSize:%d\n" +
@@ -105,8 +106,30 @@ public class URLParserHelper {
 			    threadPool.getPoolSize(),
 			    threadPool.getQueue().size(),
 			    threadPool.getQueue().remainingCapacity()));
+			
+			ParseURLTask task = new ParseURLTask(parser, strURL);
+			while(!submit(task)) {
+				try {
+					logger.warn(String.format("URLParser.threadPool is full, so try to sleep %d ms, then retry", 100));
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					logger.error(e);
+					Thread.currentThread().interrupt();
+				}
+			}
+			
+			
 		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException(String.format("Wrong url:%s", strURL), e);
+		}
+	}
+	
+	private static boolean submit(ParseURLTask task) {
+		try {
+			threadPool.execute(task);
+			return true;
+		} catch (RejectedExecutionException e) {
+			return false;
 		}
 	}
 	

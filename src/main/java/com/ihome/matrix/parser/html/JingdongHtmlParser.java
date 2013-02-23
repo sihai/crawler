@@ -1,14 +1,12 @@
 package com.ihome.matrix.parser.html;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
-import net.sf.json.JSONObject;
 import net.sourceforge.tess4j.TesseractException;
 
 import org.apache.commons.logging.Log;
@@ -38,24 +36,34 @@ public class JingdongHtmlParser extends AbstractHtmlParser {
 
 	private static final Log logger = LogFactory.getLog(JingdongHtmlParser.class);
 
-	private static final Pattern JINGDONG_ITEM_URL_PATTERN = Pattern.compile("^http://www.360buy.com/product/(\\S)*\\.html(\\S)*");
-
-	@Override
-	protected boolean accept(String strURL) {
-		return JINGDONG_ITEM_URL_PATTERN.matcher(strURL).matches();
+	private static final List<Pattern> JINGDONG_ITEM_URL_PATTERNS = new ArrayList<Pattern>(2); 
+	static {
+		JINGDONG_ITEM_URL_PATTERNS.add(Pattern.compile("^http://www.360buy.com/product/(\\S)*\\.html(\\S)*"));
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html, String charset) {
-		return parseJingdongItem(strURL, html, charset);
+	protected boolean accept(String strURL) {
+		for(Pattern p : JINGDONG_ITEM_URL_PATTERNS) {
+			if(p.matcher(strURL).matches()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	protected ItemDO doParse(String strURL, byte[] content, String charset) {
+		return parseItem(strURL, content, charset);
 	}
 
 	/**
 	 * 
+	 * @param strURL
 	 * @param content
+	 * @param charset
 	 * @return
 	 */
-	public ItemDO parseJingdongItem(String strURL, String html, String charset) {
+	public ItemDO parseItem(String strURL, byte[] content, String charset) {
 		ItemDO item = new ItemDO();
 		item.setPlatform(PlatformEnum.PLATFORM_360_BUY.getValue());
 		item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_360_BUY));
@@ -67,7 +75,13 @@ public class JingdongHtmlParser extends AbstractHtmlParser {
 		item.setIsDeleted(false);
 		item.setGmtCreate(new Date());
 		item.setGmtModified(item.getGmtCreate());
-
+		
+		String html = null;
+		try {
+			html = new String(content, charset);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(String.format("Please make sure the charset of url:%s, try to use charset:%s", strURL, charset));
+		}
 		//write2File("/home/sihai/ihome/jingdong.html", html, charset);
 		
 		Document document = Jsoup.parse(html);
@@ -99,7 +113,7 @@ public class JingdongHtmlParser extends AbstractHtmlParser {
 		}
 		
 		// 生成类目树
-		CategoryDO category = generateCategoryTree(PlatformEnum.PLATFORM_360_BUY, categoryPath);
+		CategoryDO category = generateCategoryTree(PlatformEnum.PLATFORM_360_BUY.getValue(), categoryPath);
 		item.setCategory(category);
 
 		// price
@@ -111,7 +125,7 @@ public class JingdongHtmlParser extends AbstractHtmlParser {
 		// photo
 		es = document.select("div#spec-n1 > img");
 		if(!es.isEmpty()) {
-			item.setLogoURL(generatePhoto(es.first().attr("src")));
+			item.setLogoURL(generatePhoto(strURL, es.first().attr("src")));
 		}
 		
 		// gifts

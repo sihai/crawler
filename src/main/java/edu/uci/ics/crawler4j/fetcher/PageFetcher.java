@@ -55,6 +55,7 @@ import edu.uci.ics.crawler4j.crawler.Configurable;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import edu.uci.ics.crawler4j.url.WebURL;
+import edu.uci.ics.crawler4j.util.URLUtil;
 
 /**
  * @author Yasser Ganjisaffar <lastname at gmail dot com>
@@ -154,7 +155,7 @@ public class PageFetcher extends Configurable {
 			}
 			
 			get.addHeader("Accept-Encoding", "gzip");
-			get.addHeader("User-Agent", "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.89 Safari/537.1");
+			get.addHeader("User-Agent", URLUtil.USER_AGENT);
 			HttpResponse response = httpClient.execute(get);
 			fetchResult.setEntity(response.getEntity());
 

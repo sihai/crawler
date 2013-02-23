@@ -1,6 +1,7 @@
 package com.ihome.matrix.parser.html;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,18 +43,12 @@ public class Coo8HtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html, String charset) {
-		return parseCoo8Item(strURL, html, charset);
+	protected ItemDO doParse(String strURL, byte[] content, String charset) {
+		return parseItem(strURL, content, charset);
 	}
 	
-	/**
-	 * 
-	 * @param strURL
-	 * @param html
-	 * @param charset
-	 * @return
-	 */
-	private ItemDO parseCoo8Item(String strURL, String html, String charset) {
+	
+	private ItemDO parseItem(String strURL, byte[] content, String charset) {
 		ItemDO item = new ItemDO();
 		item.setPlatform(PlatformEnum.PLATFORM_COO8.getValue());
 		item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_COO8));
@@ -65,7 +60,13 @@ public class Coo8HtmlParser extends AbstractHtmlParser {
 		item.setIsDeleted(false);
 		item.setGmtCreate(new Date());
 		item.setGmtModified(item.getGmtCreate());
-			  
+		
+		String html = null;
+		try {
+			html = new String(content, charset);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(String.format("Please make sure the charset of url:%s, try to use charset:%s", strURL, charset));
+		}
 		//write2File("/home/sihai/ihome/coo8.html", html, charset);
 		  
 		Document document = Jsoup.parse(html);
@@ -92,7 +93,7 @@ public class Coo8HtmlParser extends AbstractHtmlParser {
 			}
 		}
 	      
-		CategoryDO category = generateCategoryTree(PlatformEnum.PLATFORM_COO8, categoryPath);
+		CategoryDO category = generateCategoryTree(PlatformEnum.PLATFORM_COO8.getValue(), categoryPath);
 		item.setCategory(category);
 		  
 		// price
@@ -104,7 +105,7 @@ public class Coo8HtmlParser extends AbstractHtmlParser {
 		// photo
 		es = document.select(".thumbItem.thumbCur > a");
 		if(!es.isEmpty()) {
-			item.setLogoURL(generatePhoto(es.first().attr("href")));
+			item.setLogoURL(generatePhoto(strURL, es.first().attr("href")));
 		}
 		  
 		return item;

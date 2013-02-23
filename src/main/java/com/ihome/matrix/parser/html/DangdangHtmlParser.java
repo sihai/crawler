@@ -1,5 +1,6 @@
 package com.ihome.matrix.parser.html;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,18 +43,12 @@ public class DangdangHtmlParser extends AbstractHtmlParser {
 	}
 
 	@Override
-	protected ItemDO doParse(String strURL, String html, String charset) {
-		return parseDangdangItem(strURL, html, charset);
+	protected ItemDO doParse(String strURL, byte[] content, String charset) {
+		return parseItem(strURL, content, charset);
 	}
 	
-	/**
-	 * 
-	 * @param strURL
-	 * @param html
-	 * @param charset
-	 * @return
-	 */
-	public ItemDO parseDangdangItem(String strURL, String html, String charset) {
+	
+	public ItemDO parseItem(String strURL, byte[] content, String charset) {
 			ItemDO item = new ItemDO();
 			item.setPlatform(PlatformEnum.PLATFORM_DANGDANG.getValue());
 			item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_DANGDANG));
@@ -66,6 +61,12 @@ public class DangdangHtmlParser extends AbstractHtmlParser {
 			item.setGmtCreate(new Date());
 			item.setGmtModified(item.getGmtCreate());
 			
+			String html = null;
+			try {
+				html = new String(content, charset);
+			} catch (UnsupportedEncodingException e) {
+				throw new RuntimeException(String.format("Please make sure the charset of url:%s, try to use charset:%s", strURL, charset));
+			}
 			//write2File("/home/sihai/ihome/dangdang.html", html, charset);
 			
 			Document document = Jsoup.parse(html);
@@ -95,7 +96,7 @@ public class DangdangHtmlParser extends AbstractHtmlParser {
 				}
 			}
 			// 生成类目树
-			CategoryDO category = generateCategoryTree(PlatformEnum.PLATFORM_DANGDANG, categoryPath);
+			CategoryDO category = generateCategoryTree(PlatformEnum.PLATFORM_DANGDANG.getValue(), categoryPath);
 			item.setCategory(category);
 			
 			// itemPrice
@@ -109,7 +110,7 @@ public class DangdangHtmlParser extends AbstractHtmlParser {
 			// photo
 			es = document.select("#largePic");
 			if (!es.isEmpty()) {
-				item.setLogoURL(generatePhoto(es.first().attr("src")));
+				item.setLogoURL(generatePhoto(strURL, es.first().attr("src")));
 			}
 			return item;
 	}

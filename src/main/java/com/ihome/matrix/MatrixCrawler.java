@@ -5,15 +5,14 @@ package com.ihome.matrix;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import com.ihome.matrix.parser.html.HtmlParserHelper;
 import com.ihome.matrix.parser.url.URLParserHelper;
+import com.ihome.matrix.plugin.PluginRepository;
 
+import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.url.WebURL;
@@ -45,9 +44,18 @@ public class MatrixCrawler extends WebCrawler {
 		charsetMap.put("www.redbaby.com.cn", "utf-8");
 		charsetMap.put("www.suning.com", "utf-8");
 		charsetMap.put("www.tao3c.com", "gb2312");
+		charsetMap.put("www.ehaoyao.com", "gb2312");
+		charsetMap.put("www.111.com.cn", "utf-8");
+		charsetMap.put("www.bjypw.com", "utf-8");
+		charsetMap.put("www.daoyao.com", "utf-8");
+		charsetMap.put("www.hp1997.com", "gb2312");
+		charsetMap.put("www.gyjm.com.cn", "utf-8");
+		charsetMap.put("www.huatuoyf.com", "utf-8");
+		charsetMap.put("www.j1.com", "utf-8");
+		charsetMap.put("www.jxdyf.com", "utf-8");
 	}
 	
-	private static List<Pattern> acceptPatternList;
+	/*private static List<Pattern> acceptPatternList;
 	
 	static {
 		acceptPatternList = new ArrayList<Pattern>();
@@ -102,22 +110,29 @@ public class MatrixCrawler extends WebCrawler {
 		acceptPatternList.add(Pattern.compile("http://www.yihaodian.com/cmsPage/show.do\\?[\\s|\\S]+"));
 		acceptPatternList.add(Pattern.compile("http://www.yihaodian.com/product/[\\s|\\S]+"));
 		
+	}*/
+	
+	
+	@Override
+	public void init(int myId, CrawlController crawlController) {
+		super.init(myId, crawlController);
 	}
 	
 	@Override
+	public void onBeforeExit() {
+		super.onBeforeExit();
+	}
+
+	@Override
 	public boolean shouldVisit(WebURL url) {
-		for(Pattern p : acceptPatternList) {
-			if(p.matcher(url.getURL()).matches()) {
-				return true;
-			}
-		}
-		return false;
+		return PluginRepository.getURLFilter().shouldAccept(url.getURL());
 	}
 
 	@Override
 	public void visit(Page page) {
 		//System.out.println(String.format("URL:%s", page.getWebURL().getURL()));
-		HtmlParserHelper.parse(page.getWebURL().getURL(), new String(page.getContentData()), getCharset(page.getWebURL().getURL()));
+		String charset = getCharset(page.getWebURL().getURL());
+		HtmlParserHelper.parse(page.getWebURL().getURL(), page.getContentData(), charset);
 	}
 	
 	@Override

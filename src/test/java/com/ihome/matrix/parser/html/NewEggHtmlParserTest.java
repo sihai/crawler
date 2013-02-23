@@ -18,13 +18,13 @@ public class NewEggHtmlParserTest extends TestCase {
 	@Test
 	public void test() {
 		for(String url : URLS) {
-			parser.parse(url, URLUtil.fetchHtml(url, "gb2312"), "gb2312");
+			parser.parse(url, URLUtil.fetchContent(url, "gb2312"), "gb2312");
 		}
 	}
 	
 	public static void main(String[] args) {
 		for(String url : URLS) {
-			parser.parse(url, URLUtil.fetchHtml(url, "gb2312"), "gb2312");
+			parser.parse(url, URLUtil.fetchContent(url, "gb2312"), "gb2312");
 		}
 	}
 }

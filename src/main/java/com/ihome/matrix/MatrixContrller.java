@@ -3,15 +3,19 @@
  */
 package com.ihome.matrix;
 
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Properties;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.iacrqq.util.StringUtil;
 import com.ihome.matrix.parser.html.HtmlParserHelper;
 import com.ihome.matrix.parser.url.URLParserHelper;
+import com.ihome.matrix.plugin.PluginRepository;
 
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
@@ -27,6 +31,60 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 public class MatrixContrller {
 	
 	private static final Log logger = LogFactory.getLog(MatrixContrller.class);
+	
+	private static final String COMMENT_TAG = "#";
+	private static final String SEED_FILE_NAME = "seed.txt";
+	
+	private static void initPlugin() {
+		PluginRepository.init();
+	}
+	
+	private static void stopPlugin() {
+		PluginRepository.stop();
+	}
+	
+	/**
+	 * 
+	 * @param controller
+	 */
+	private static void initSeed(CrawlController controller) {
+		
+		 InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(SEED_FILE_NAME);
+		if(null == is) {
+			logger.warn(String.format("Can not load seed from file :%s, can not found this file in classpath", SEED_FILE_NAME));
+		} else {
+			BufferedReader reader = null;
+			try {
+				reader = new BufferedReader(new InputStreamReader(is));
+				String line = null;
+				while(null != (line = reader.readLine())) {
+					if(StringUtil.isBlank(line) || StringUtil.trim(line).startsWith(COMMENT_TAG)) {
+						continue;
+					}
+					logger.info(String.format("Add seed url:%s", line));
+					controller.addSeed(StringUtil.trim(line));
+				}
+			} catch (FileNotFoundException e) {
+				// NOT POSSIABLE
+				logger.warn(String.format("Can not load configuration from file :%s, can not found this file", SEED_FILE_NAME), e);
+			} catch (IOException e) {
+				logger.warn(String.format("Can not load configuration from file :%s, can read this file", SEED_FILE_NAME), e);
+			} finally {
+				if(null != reader) {
+					try {
+						reader.close();
+					} catch (IOException e) {
+						logger.error(e);
+					}
+				}
+				try {
+					is.close();
+				} catch (IOException e) {
+					logger.error(e);
+				}
+			}
+		}
+	}
 	
 	public static void main(String[] args) {
 		
@@ -74,7 +132,7 @@ public class MatrixContrller {
 		     * URLs that are fetched and then the crawler starts following links
 		     * which are found in these pages
 		     */
-		    //===============================================
+		    /*//===============================================
 		    //			化妆品
 		    //===============================================
 		    // skii
@@ -209,9 +267,15 @@ public class MatrixContrller {
 		    //===============================================
 		    controller.addSeed("http://channel.yihaodian.com/meihu/1/");
 		    controller.addSeed("http://channel.yihaodian.com/muying");
-		    controller.addSeed("http://www.yihaodian.com/channel/8704_1/");
+		    controller.addSeed("http://www.yihaodian.com/channel/8704_1/");*/
 		    
-		    // init 
+		    //
+		    initPlugin();
+		    // init seed
+		    initSeed(controller);
+		    
+		    // init
+		    MatrixHttpClientWrap.init();
 		    URLParserHelper.init();
 		    HtmlParserHelper.init();
 		    
@@ -222,11 +286,15 @@ public class MatrixContrller {
 		    controller.start(MatrixCrawler.class, numberOfCrawlers);
 		    
 		    Thread.currentThread().join();
+		    
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
+			// 
+		    stopPlugin();
+			MatrixHttpClientWrap.destroy();
 			URLParserHelper.stop();
 			HtmlParserHelper.stop();
 		}

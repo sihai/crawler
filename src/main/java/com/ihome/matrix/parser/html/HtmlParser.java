@@ -13,8 +13,8 @@ public interface HtmlParser {
 	/**
 	 * 
 	 * @param url
-	 * @param html
+	 * @param content
 	 * @param charset
 	 */
-	void parse(String url, String html, String charset);
+	void parse(String url, byte[] content, String charset);
 }

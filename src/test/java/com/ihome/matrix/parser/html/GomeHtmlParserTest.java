@@ -14,10 +14,10 @@ public class GomeHtmlParserTest extends TestCase {
 
 	@Test
 	public void test() {
-		parser.parse(URL, URLUtil.fetchHtml(URL, "utf-8"), "utf-8");
+		parser.parse(URL, URLUtil.fetchContent(URL, "utf-8"), "utf-8");
 	}
 	
 	public static void main(String[] args) {
-		parser.parse(URL, URLUtil.fetchHtml(URL, "utf-8"), "utf-8");
+		parser.parse(URL, URLUtil.fetchContent(URL, "utf-8"), "utf-8");
 	}
 }

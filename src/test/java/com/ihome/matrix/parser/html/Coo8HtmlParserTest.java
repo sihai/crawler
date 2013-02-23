@@ -19,13 +19,13 @@ public class Coo8HtmlParserTest extends TestCase {
 	@Test
 	public void test() {
 		for(String url : URLS) {
-			parser.parse(url, URLUtil.fetchHtml(url, "gbk"), "gbk");
+			parser.parse(url, URLUtil.fetchContent(url, "gbk"), "gbk");
 		}
 	}
 	
 	public static void main(String[] args) {
 		for(String url : URLS) {
-			parser.parse(url, URLUtil.fetchHtml(url, "gbk"), "gbk");
+			parser.parse(url, URLUtil.fetchContent(url, "gbk"), "gbk");
 		}
 	}
 }
