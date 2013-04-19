@@ -54,7 +54,7 @@ public class GomeHtmlParser extends AbstractHtmlParser {
 		item.setPlatform(PlatformEnum.PLATFORM_GOME.getValue());
 		item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_GOME));
 		item.setDetailURL(strURL);
-		item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
+		//item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 		item.setNumber(-1L);
 		item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
 		item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());

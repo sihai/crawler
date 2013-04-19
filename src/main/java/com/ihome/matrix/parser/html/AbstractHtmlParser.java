@@ -120,7 +120,7 @@ public abstract class AbstractHtmlParser implements HtmlParser {
 			  cat = new CategoryDO();
 			  cat.setName(catName);
 			  cat.setDescription(cat.getName());
-			  cat.setPlatform(platform);
+			  //cat.setPlatform(platform);
 			  cat.setStatus(CategoryStatusEnum.NORMAL.getValue());
 			  cat.setRank(0);
 			  cat.setIsDeleted(false);

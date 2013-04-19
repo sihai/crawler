@@ -53,7 +53,7 @@ public class Coo8HtmlParser extends AbstractHtmlParser {
 		item.setPlatform(PlatformEnum.PLATFORM_COO8.getValue());
 		item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_COO8));
 		item.setDetailURL(strURL);
-		item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
+		////item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 		item.setNumber(-1L);
 		item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
 		item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());

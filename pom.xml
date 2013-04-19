@@ -229,11 +229,11 @@
 			<version>0.0.1</version>
 		</dependency>
 		
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.ihome</groupId>
 			<artifactId>jingdong-sdk</artifactId>
 			<version>0.0.1</version>
-		</dependency>
+		</dependency> -->
 		
 		<dependency>
 			<groupId>com.ihome</groupId>

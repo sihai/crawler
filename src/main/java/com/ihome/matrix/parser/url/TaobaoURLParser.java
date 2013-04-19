@@ -48,8 +48,8 @@ public class TaobaoURLParser extends AbstractURLParser {
 	public static final String PARAMETER_MALL_ST_ITEM_ID = "mallstItemId";
 	
 	private static final String GATEWAY = "http://gw.api.taobao.com/router/rest";
-	private static final String APP_KEY = "12553640";
-    private static final String SECRET = "de463fd7cc82a51b060ffe6a11e345f9";
+	private static final String APP_KEY = "21341192";
+    private static final String SECRET = "63808a2f09a9c500c49db480e9d25b21";
 
     private static final TaobaoClient client = new DefaultTaobaoClient(GATEWAY, APP_KEY, SECRET, "json", 5000, 15000);
     
@@ -67,6 +67,10 @@ public class TaobaoURLParser extends AbstractURLParser {
 	protected void process(String itemId) {
 		logger.info(String.format("Process one item in Taobao, itemId:%s", itemId));
 		ItemDO item = getItem(Long.valueOf(itemId.trim()));
+		item.setIsRecommended(false);
+		ShopDO shop = item.getShop();
+		shop.setRank(Long.MAX_VALUE);
+		shop.setIsRecommend(false);
 		if(null != item) {
 			MatrixBridge.sync(item);
 		}
@@ -94,7 +98,6 @@ public class TaobaoURLParser extends AbstractURLParser {
 			if(null != tcat) {
 				CategoryDO category = new CategoryDO();
 				category.setIsDeleted(false);
-				category.setPlatform(platform.getValue());
 				category.setName(tcat.getName());
 				category.setDescription(category.getName());
 				category.setStatus(CategoryStatusEnum.NORMAL.getValue());
@@ -105,7 +108,6 @@ public class TaobaoURLParser extends AbstractURLParser {
 					tcat = getTaobaoCategory(parentId);
 					CategoryDO parent = new CategoryDO();
 					parent.setIsDeleted(false);
-					parent.setPlatform(platform.getValue());
 					parent.setName(tcat.getName());
 					parent.setDescription(parent.getName());
 					parent.setStatus(CategoryStatusEnum.NORMAL.getValue());
@@ -127,10 +129,9 @@ public class TaobaoURLParser extends AbstractURLParser {
 		ItemDO igoItem = new ItemDO();
 		
 		ShopDO igoShop = new ShopDO();
-		igoShop.setBulletin(shop.getBulletin());
 		igoShop.setDescription(shop.getDesc());
 		igoShop.setShopId(shop.getSid().toString());
-		igoShop.setDetailURL("shop" + shop.getSid() + ".taobao.com");
+		igoShop.setDetailURL("http://shop" + shop.getSid() + ".taobao.com");
 		igoShop.setIsDeleted(false);
 		igoShop.setGmtCreate(new Date());
 		igoShop.setGmtModified(igoShop.getGmtCreate());
@@ -155,9 +156,7 @@ public class TaobaoURLParser extends AbstractURLParser {
 		igoItem.setHasDiscount(item.getHasDiscount());
 		igoItem.setHasInvoice(item.getHasInvoice());
 		igoItem.setHasWarranty(item.getHasWarranty());
-		//igoItem.setIsSecondKill(item.getSecondKill());
 		igoItem.setIsSellPromise(item.getSellPromise());
-		igoItem.setIsXinpin(item.getIsXinpin());
 		igoItem.setItemId(item.getNumIid().toString());
 		Location l = item.getLocation();
 		if(null != l) {
@@ -174,7 +173,6 @@ public class TaobaoURLParser extends AbstractURLParser {
 		if(null == status) {
 			status = StuffStatusEnum.STUFF_NEW;
 		}
-		igoItem.setStuffStatus(status.getValue());
 		igoItem.setIsDeleted(false);
 		igoItem.setGmtCreate(new Date());
 		igoItem.setGmtModified(igoItem.getGmtCreate());

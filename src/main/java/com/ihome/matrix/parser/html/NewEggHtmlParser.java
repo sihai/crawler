@@ -61,7 +61,7 @@ public class NewEggHtmlParser extends AbstractHtmlParser {
 		item.setPlatform(PlatformEnum.PLATFORM_NEW_EGG.getValue());
 		item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_NEW_EGG));
 		item.setDetailURL(strURL);
-		item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
+		//item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 		item.setNumber(-1L);
 		item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
 		item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());

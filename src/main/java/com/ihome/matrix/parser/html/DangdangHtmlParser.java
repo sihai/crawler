@@ -53,7 +53,7 @@ public class DangdangHtmlParser extends AbstractHtmlParser {
 			item.setPlatform(PlatformEnum.PLATFORM_DANGDANG.getValue());
 			item.setShop(MatrixBridge.getFixedShop(PlatformEnum.PLATFORM_DANGDANG));
 			item.setDetailURL(strURL);
-			item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
+			////item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 			item.setNumber(-1L);
 			item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
 			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());

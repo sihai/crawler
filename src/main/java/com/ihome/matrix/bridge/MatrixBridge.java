@@ -135,7 +135,7 @@ public class MatrixBridge {
 		item.setProduct(product);
 		
 		syncDB(item);
-		syncIndex(item);
+		//syncIndex(item);
 	}
 	
 	/**
@@ -147,15 +147,15 @@ public class MatrixBridge {
 		//ShopDO igoShop = syncShop(item.getShop());
 		//if(null != igoShop) {
 			if(null != item.getBrand()) {
-				syncBrand(item.getBrand());
+				//syncBrand(item.getBrand());
 			}
 			syncShop(item.getShop());
 			//syncCategory(item.getCategory());
 			syncItem(item);
 
-			if(null != item.getCommentList() && !item.getCommentList().isEmpty()) {
+			/*if(null != item.getCommentList() && !item.getCommentList().isEmpty()) {
 				syncComment(item, item.getCommentList());
-			}
+			}*/
 		//}
 	}
 	
@@ -301,7 +301,7 @@ public class MatrixBridge {
 	 * @param category
 	 */
 	private static void syncOneCategory(CategoryDO category) {
-		String name = category.getName();
+		/*String name = category.getName();
 		int index = name.hashCode() % MAX_LOCK;
 		index = index < 0 ? -index : index;
 		synchronized(categoryLockMap.get(index)) {
@@ -316,7 +316,7 @@ public class MatrixBridge {
 			} catch (ValidateException e) {
 				logger.error("Not possiable, sync shop data from taobao failed, exception", e);
 			}
-		}
+		}*/
 	}
 	/**
 	 * 

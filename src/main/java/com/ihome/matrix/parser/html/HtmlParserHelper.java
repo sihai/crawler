@@ -962,7 +962,7 @@ public class HtmlParserHelper {
 			item.setPlatform(configuration.platform);
 			item.setShop(shop);
 			item.setDetailURL(strURL);
-			item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
+			//item.setStuffStatus(StuffStatusEnum.STUFF_NEW.getValue());
 			item.setNumber(-1L);
 			item.setStatus(ItemStatusEnum.ITEM_STATUS_ON_SALE.getValue());
 			item.setFreightFeePayer(FreightFeePayerEnum.FREIGHT_FEE_PALYER_SELLER.getValue());
@@ -1095,7 +1095,7 @@ public class HtmlParserHelper {
 				}
 			}
 			
-			// one start count
+			/*// one start count
 			if(null != configuration.oneStartCSSPath) {
 				es = document.select(configuration.oneStartCSSPath);
 				if(!es.isEmpty()) {
@@ -1129,7 +1129,7 @@ public class HtmlParserHelper {
 				if(!es.isEmpty()) {
 					item.setFiveStartCount(Long.valueOf(StringUtil.trim(es.first().html())));
 				}
-			}
+			}*/
 			
 			// groovy script
 			/*if(StringUtil.isNotBlank(configuration.groovyScriptFile) && null != targetObject && null != targetMethod) {
@@ -1145,13 +1145,13 @@ public class HtmlParserHelper {
 			}*/
 			// 先用java代码调试
 			
-			executeGroovy(item, document);
+			//executeGroovy(item, document);
 			
 			return item;
 		}
 		
 		private void executeGroovy(ItemDO item, Document document) {
-			String tmpStr = null;
+			/*String tmpStr = null;
 			Elements tmp = null;
 			CommentDO comment = null;
 			List<CommentDO> commentList = new ArrayList<CommentDO>();
@@ -1210,7 +1210,7 @@ public class HtmlParserHelper {
 					commentList.add(comment);
 				}
 				item.setCommentList(commentList);
-			}
+			}*/
 		}
 	}
 }
