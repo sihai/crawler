@@ -163,7 +163,7 @@ public class MatrixCrawler extends WebCrawler {
 	public static void main(String[] args) {
 		MatrixCrawler c = new MatrixCrawler();
 		WebURL webURL = new WebURL();
-		webURL.setURL("http://www.amazon.cn/AVON%E9%9B%85%E8%8A%B3%E5%B0%8F%E9%BB%91%E8%A3%99%E8%B5%B0%E7%8F%A0%E9%A6%99%E6%B0%B49ml/dp/B0023W6RY6/ref=pd_ts_zgc_beauty_746781051_7_i?ie=UTF8&pf_rd_i=746776051&pf_rd_m=A1AJ19PSB66TGU&pf_rd_p=58626252&pf_rd_r=1D");
+		webURL.setURL("http://qilekang.tmall.com/");
 		System.out.println(c.shouldVisit(webURL));
 	}
 }

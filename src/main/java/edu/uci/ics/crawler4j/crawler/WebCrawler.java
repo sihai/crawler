@@ -261,6 +261,8 @@ public class WebCrawler implements Runnable {
 							if (shouldVisit(webURL) && robotstxtServer.allows(webURL)) {
 								webURL.setDocid(docIdServer.getNewDocID(movedToUrl));
 								frontier.schedule(webURL);
+							} else {
+								logger.warn(String.format("Reject url:%s", webURL.getURL()));
 							}
 						}
 					}

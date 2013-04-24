@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import com.ihome.matrix.enums.PlatformEnum;
 
 import edu.uci.ics.crawler4j.util.CrawlerThreadFactory;
+import edu.uci.ics.crawler4j.util.ThreadContext;
 
 /**
  * 
@@ -154,6 +155,10 @@ public class URLParserHelper {
 				  parser.parse(url);
 			  } catch (Throwable t) {
 				  logger.error(String.format("Parse url:%s failed", url), t);
+			  } finally {
+				  // clear thread local storage
+				  ThreadContext.context.get().clear();
+				  ThreadContext.context.remove();
 			  }
 		  }
 	  }

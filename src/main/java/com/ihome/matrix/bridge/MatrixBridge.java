@@ -9,12 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.ihome.matrix.cluster.DefaultCluster;
+import com.ihome.matrix.cluster.Cluster;
 import com.ihome.matrix.dao.exception.ValidateException;
 import com.ihome.matrix.domain.BrandDO;
 import com.ihome.matrix.domain.CategoryDO;
@@ -24,6 +25,7 @@ import com.ihome.matrix.domain.ProductDO;
 import com.ihome.matrix.domain.ShopCategoryDO;
 import com.ihome.matrix.domain.ShopDO;
 import com.ihome.matrix.domain.ShopProductDO;
+import com.ihome.matrix.domain.TmpProductDO;
 import com.ihome.matrix.enums.CommentTypeEnum;
 import com.ihome.matrix.enums.PlatformEnum;
 import com.ihome.matrix.enums.ShopStatusEnum;
@@ -34,6 +36,7 @@ import com.ihome.matrix.manager.CategoryManager;
 import com.ihome.matrix.manager.CommentManager;
 import com.ihome.matrix.manager.ItemManager;
 import com.ihome.matrix.manager.ShopManager;
+import com.ihome.matrix.manager.TmpProductManager;
 
 /**
  * 
@@ -49,6 +52,7 @@ public class MatrixBridge {
 	private static final String SHOP_MANAGER = "shopManager";			// bean name for shopManager
 	private static final String CATEGORY_MANAGER = "categoryManager";	// bean name for categoryManagerprivate static final String CATEGORY_MANAGER = "categoryManager";	// bean name for categoryManager
 	private static final String COMMENT_MANAGER = "commentManager";		// bean name for commentManager
+	private static final String TMP_PRODUCT_MANAGER = "tmpProductManager";
 	
 	private static final String DEFAULT_CLUSTER = "defaultCluster";		// bean name for defaultCluster
 	
@@ -63,7 +67,9 @@ public class MatrixBridge {
 	private static CategoryManager categoryManager;	//
 	private static CommentManager commentManager;	// 
 	
-	private static DefaultCluster defaultCluster;	// 
+	private static TmpProductManager tmpProductManager;
+	
+	private static Cluster cluster;	// 
 	
 	private static ItemSolrIndexer itemSolrIndexer;	//
 	private static ShopSolrIndexer shopSolrIndexer;	//
@@ -77,18 +83,21 @@ public class MatrixBridge {
     private static Map<Integer, Object> shopLockMap;
     private static Map<Integer, Object> brandLockMap;
     private static Map<Integer, Object> categoryLockMap;
+    private static Map<Integer, Object> tmpProductLockMap;
     
     static {
     	brandLockMap = new HashMap<Integer, Object>();
     	itemLockMap = new HashMap<Integer, Object>();
     	shopLockMap = new HashMap<Integer, Object>();
     	categoryLockMap = new HashMap<Integer, Object>();
+    	tmpProductLockMap = new HashMap<Integer, Object>();
     	
     	for(int i = 0; i < MAX_LOCK; i++) {
     		brandLockMap.put(Integer.valueOf(i), new Object());
     		itemLockMap.put(Integer.valueOf(i), new Object());
     		shopLockMap.put(Integer.valueOf(i), new Object());
     		categoryLockMap.put(Integer.valueOf(i), new Object());
+    		tmpProductLockMap.put(Integer.valueOf(i), new Object());
     	}
     		
     }
@@ -101,8 +110,9 @@ public class MatrixBridge {
 		itemManager = (ItemManager)context.getBean(ITEM_MANAGER);
 		categoryManager = (CategoryManager)context.getBean(CATEGORY_MANAGER);
 		commentManager = (CommentManager)context.getBean(COMMENT_MANAGER);
+		tmpProductManager = (TmpProductManager)context.getBean(TMP_PRODUCT_MANAGER);
 		
-		defaultCluster = (DefaultCluster)context.getBean(DEFAULT_CLUSTER);
+		cluster = (Cluster)context.getBean(DEFAULT_CLUSTER);
 		
 		itemSolrIndexer = (ItemSolrIndexer)context.getBean(ITEM_SOLR_INDEXER);
 		shopSolrIndexer = (ShopSolrIndexer)context.getBean(SHOP_SOLR_INDEXER);
@@ -129,9 +139,9 @@ public class MatrixBridge {
 	 */
 	public static void sync(ItemDO item) {
 		// 
-		CategoryDO category = defaultCluster.clusterCategory(item);
+		CategoryDO category = cluster.clusterCategory(item);
 		item.setCategory(category);
-		ProductDO product = defaultCluster.clusterProduct(item);
+		ProductDO product = cluster.clusterProduct(item);
 		item.setProduct(product);
 		
 		syncDB(item);
@@ -358,6 +368,42 @@ public class MatrixBridge {
 			} catch (ValidateException e) {
 				logger.error("Not possiable, sync item data from taobao failed, exception", e);
 			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param product
+	 * @param platform
+	 * @return
+	 */
+	public static Long getTmpProductId(ProductDO product, Integer platform) {
+		Long outProductId = product.getId();
+		int hashcode = outProductId.hashCode() + platform.hashCode();
+		int index = hashcode % MAX_LOCK;
+		index = index < 0 ? -index : index;
+		synchronized(tmpProductLockMap.get(index)) {
+			TmpProductDO tp = tmpProductManager.getByOutProductIdIdAndPlatform(outProductId, platform);
+			if(null == tp) {
+				tp = new TmpProductDO();
+				tp.setOutProductId(outProductId);
+				tp.setOutProductName(product.getName());
+				tp.setOutCategoryId(product.getCategory().getId());
+				tp.setOutCategoryName(product.getCategory().getName());
+				tp.setPlatform(platform);
+				tp.setLogoURL(product.getLogoURL());
+				tp.setDescription(product.getDescription());
+				if(null != product.getPropertyList()) {
+					tp.setProperty(StringUtils.join(product.getPropertyList().iterator(), ","));
+				}
+				tp.setIsDeleted(false);
+				try {
+					tmpProductManager.add(tp);
+				} catch (ValidateException e) {
+					throw new RuntimeException("Not possible");
+				}
+			}
+			return tp.getId();
 		}
 	}
 	

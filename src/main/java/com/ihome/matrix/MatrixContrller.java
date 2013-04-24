@@ -9,10 +9,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.iacrqq.util.StringUtil;
+import com.ihome.matrix.bridge.MatrixBridge;
+import com.ihome.matrix.domain.ShopDO;
+import com.ihome.matrix.model.ResultModel;
+import com.ihome.matrix.model.ShopQueryModel;
 import com.ihome.matrix.parser.html.HtmlParserHelper;
 import com.ihome.matrix.parser.url.URLParserHelper;
 import com.ihome.matrix.plugin.PluginRepository;
@@ -49,6 +53,14 @@ public class MatrixContrller {
 	 */
 	private static void initSeed(CrawlController controller) {
 		
+		initSeedFromDatabase(controller);
+	}
+	
+	/**
+	 * 
+	 * @param controller
+	 */
+	private static void initSeedFromFile(CrawlController controller) {
 		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(SEED_FILE_NAME);
 		if(null == is) {
 			logger.warn(String.format("Can not load seed from file :%s, can not found this file in classpath", SEED_FILE_NAME));
@@ -58,11 +70,11 @@ public class MatrixContrller {
 				reader = new BufferedReader(new InputStreamReader(is));
 				String line = null;
 				while(null != (line = reader.readLine())) {
-					if(StringUtil.isBlank(line) || StringUtil.trim(line).startsWith(COMMENT_TAG)) {
+					if(StringUtils.isBlank(line) || StringUtils.trim(line).startsWith(COMMENT_TAG)) {
 						continue;
 					}
 					logger.info(String.format("Add seed url:%s", line));
-					controller.addSeed(StringUtil.trim(line));
+					controller.addSeed(StringUtils.trim(line));
 				}
 			} catch (FileNotFoundException e) {
 				// NOT POSSIABLE
@@ -83,6 +95,28 @@ public class MatrixContrller {
 					logger.error(e);
 				}
 			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param controller
+	 */
+	private static void initSeedFromDatabase(CrawlController controller) {
+		Long currentPage = 1L;
+		ShopQueryModel queryModel = ShopQueryModel.newInstance();
+		ResultModel<ShopDO> result = null;
+		for(;;) {
+			queryModel.setCurrentPage(currentPage++);
+			result = MatrixBridge.getShopManager().query(queryModel);
+			if(result.getItemList().isEmpty()) {
+				break;
+			}
+			for(ShopDO shop : result.getItemList()) {
+				controller.addSeed(StringUtils.trim(shop.getDetailURL()));
+				logger.info(String.format("Add seed url:%s", shop.getDetailURL()));
+			}
+			result.getItemList().clear();
 		}
 	}
 	

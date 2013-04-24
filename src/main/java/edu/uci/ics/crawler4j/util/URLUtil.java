@@ -47,10 +47,7 @@ public class URLUtil {
 		try {
 			URL url = new URL(strURL);
 			String queryString = url.getQuery();
-			if (StringUtil.isEmpty(strURL)) {
-				return null;
-			}
-			if (StringUtil.isEmpty(strURL)) {
+			if (StringUtil.isEmpty(queryString)) {
 				return null;
 			}
 			String[] kvs = queryString.split("&");

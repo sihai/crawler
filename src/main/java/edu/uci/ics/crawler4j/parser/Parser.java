@@ -24,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.html.HtmlParser;
@@ -74,6 +75,7 @@ public class Parser extends Configurable {
 		HtmlContentHandler contentHandler = new HtmlContentHandler();
 		InputStream inputStream = null;
 		try {
+			//System.out.println(String.format("URL:%s, HTML:%s", page.getWebURL().getURL(), new String(page.getContentData(), "gb2312")));
 			inputStream = new ByteArrayInputStream(page.getContentData());
 			htmlParser.parse(inputStream, contentHandler, metadata, parseContext);
 		} catch (Exception e) {
@@ -129,6 +131,7 @@ public class Parser extends Configurable {
 			}
 		}
 
+		//System.out.println(String.format("outgoingUrls:%s", StringUtils.join(outgoingUrls.iterator(), ",")));
 		parseData.setOutgoingUrls(outgoingUrls);
 
 		try {

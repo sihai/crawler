@@ -156,6 +156,7 @@ public class PageFetcher extends Configurable {
 			
 			get.addHeader("Accept-Encoding", "gzip");
 			get.addHeader("User-Agent", URLUtil.USER_AGENT);
+			get.addHeader("Referer", webUrl.getParentUrl());
 			HttpResponse response = httpClient.execute(get);
 			fetchResult.setEntity(response.getEntity());
 

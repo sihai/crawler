@@ -2,7 +2,7 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
 	<appender name="PROJECT" class="org.apache.log4j.DailyRollingFileAppender">
-		<param name="file" value="${user.home}/ihome/matrix.log" />
+		<param name="file" value="${user.home}/crawler/log/crawler.log" />
 		<param name="append" value="true" />
 		<param name="encoding" value="UTF-8" />
 		<layout class="org.apache.log4j.PatternLayout">

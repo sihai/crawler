@@ -882,7 +882,7 @@ public class HtmlParserHelper {
 			}
 			
 			// init script
-			if(StringUtil.isNotBlank(configuration.groovyScriptFile)) {
+			/*if(StringUtil.isNotBlank(configuration.groovyScriptFile)) {
 				GroovyClassLoader loader = new GroovyClassLoader(HtmlParserHelper.class.getClassLoader());
 				//System.out.println(groovyScript);
 				try {
@@ -903,14 +903,14 @@ public class HtmlParserHelper {
 				} finally {
 					if(null != loader) {
 						// XXX 1.7 up
-						/*try {
+						try {
 							loader.close();
 						} catch (IOException e) {
 							logger.error(e);
-						}*/
+						}
 					}
 				}
-			}
+			}*/
 			
 			_init_shop_();
 		}
