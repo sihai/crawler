@@ -8,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -39,6 +41,8 @@ public class MatrixContrller {
 	private static final String COMMENT_TAG = "#";
 	private static final String SEED_FILE_NAME = "seed.txt";
 	
+	private static final List<String> seedList = new ArrayList<String>(32);
+	
 	private static void initPlugin() {
 		PluginRepository.init();
 	}
@@ -69,12 +73,18 @@ public class MatrixContrller {
 			try {
 				reader = new BufferedReader(new InputStreamReader(is));
 				String line = null;
+				String v = null;
 				while(null != (line = reader.readLine())) {
-					if(StringUtils.isBlank(line) || StringUtils.trim(line).startsWith(COMMENT_TAG)) {
+					if(StringUtils.isBlank(line)) {
 						continue;
 					}
-					logger.info(String.format("Add seed url:%s", line));
-					controller.addSeed(StringUtils.trim(line));
+					v = StringUtils.trim(line);
+					if(v.startsWith(COMMENT_TAG) || seedList.contains(v)) {
+						continue;
+					}
+					logger.info(String.format("Add seed url:%s", v));
+					controller.addSeed(v);
+					seedList.add(v);
 				}
 			} catch (FileNotFoundException e) {
 				// NOT POSSIABLE
@@ -106,6 +116,7 @@ public class MatrixContrller {
 		Long currentPage = 1L;
 		ShopQueryModel queryModel = ShopQueryModel.newInstance();
 		ResultModel<ShopDO> result = null;
+		String url = null;
 		for(;;) {
 			queryModel.setCurrentPage(currentPage++);
 			result = MatrixBridge.getShopManager().query(queryModel);
@@ -113,7 +124,12 @@ public class MatrixContrller {
 				break;
 			}
 			for(ShopDO shop : result.getItemList()) {
-				controller.addSeed(StringUtils.trim(shop.getDetailURL()));
+				url = StringUtils.trim(shop.getDetailURL());
+				if(StringUtils.isBlank(url) || seedList.contains(url)) {
+					continue;
+				}
+				controller.addSeed(url);
+				seedList.add(url);
 				logger.info(String.format("Add seed url:%s", shop.getDetailURL()));
 			}
 			result.getItemList().clear();
@@ -143,7 +159,7 @@ public class MatrixContrller {
 			/*Properties properties = new Properties();
 			properties.load(new FileInputStream(args[0]));*/
 			
-			String crawlStorageFolder = "/home/sihai/ihome/matrix";
+			String crawlStorageFolder = "/tmp/matrix";
 			int numberOfCrawlers = 32;
 	
 		    CrawlConfig config = new CrawlConfig();
